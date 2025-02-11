@@ -1,0 +1,14 @@
+setuptools
+wheel
+pyyaml
+pydantic-core
+mujoco
+scikit-build
+pybind11
+pygments
+rich
+dill
+markdown-it-py
+colorama
+mdurl
+python3-openvdb
