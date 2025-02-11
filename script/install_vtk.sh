@@ -41,14 +41,22 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
         mkdir -p ${INSTALL_DIR}/build
         pushd "${INSTALL_DIR}/build" >/dev/null 2>&1
             # BUILD LLVM
-            cmake ..
+            cmake .. \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DVTK_WHEEL_BUILD=ON \
+                -DVTK_WRAP_PYTHON=ON \
+                -DVTK_PYTHON_VERSION=3 \
+                -DVTK_GROUP_ENABLE_Rendering=YES \
+                -DVTK_GROUP_ENABLE_Imaging=YES \
+                -DVTK_GROUP_ENABLE_MPI=NO \
+                -DPYTHON_EXECUTABLE=$(which python)
             RESULT=$?
             if [ ${RESULT} -eq 0 ]; then
                 make -j $(nproc)
                 RESULT=$?
             fi
             if [ ${RESULT} -eq 0 ]; then
-                sudo make install
+                pip install .
                 RESULT=$?
             fi
         popd >/dev/null 2>&1

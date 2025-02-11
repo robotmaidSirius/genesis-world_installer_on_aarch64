@@ -70,8 +70,7 @@ if [ ${RESULT} -eq 0 ]; then
     ## Install: CoACD
     bash ${SCRIPT_DIR}/install_CoACD.sh -v=1.0.1 -p=${INSTALL_ROOT}
     ## Install: VTK
-    # TODO: Pythonでのインストール手順を確認中
-    #bash ${SCRIPT_DIR}/install_vtk.sh -v=9.4.1 -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_vtk.sh -v=9.4.1 -p=${INSTALL_ROOT}
 
     ## ========================================
     ## Install: taichi

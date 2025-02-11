@@ -4,10 +4,10 @@
  * 作成中です。内容が不完全です。
    * 呼び出しているスクリプト単体でテスト中。インストール手順記載のスクリプトではまだ動かしてない。
    * genesis-worldのインストールは成功
-   * VTKのインストールが出来てない
-   * venvの環境でpytorchのインストールが出来てない。CPU版をインストールしている
+   * venvの環境でpytorchのインストールが出来てない。[CPU版](https://pytorch.org/get-started/locally/)をインストールしている
 
 ```bash
+# CPU版のPyTorchをインストールして対応中
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
 
@@ -23,7 +23,29 @@ python3 -m pip install --upgrade pip
 pip install genesis-world
 ```
 
-この手順は、それまでの暫定対応です。
+## インストール方法
+
+この手順は、正規の手順での対応が完了するまでのものです。
+
+```bash
+# ビルド時にメモリが足りずにこける現象を確認してます。ビルド時のJOBS数を制限してます。
+export MAX_JOBS=4
+
+bash install_genesis_on_aarch64.sh
+```
+
+### 手順
+
+1. cmakeを最新に更新する
+2. Python仮想環境を作成する
+   1. pyenvでpython3.11をインストールする
+   2. venvで仮想環境を作成する
+3. llvmとclangをビルドする
+4. apt管理のソフトをインストールする
+5. pip管理のライブラリをインストールする
+6. pythonのライブラリをビルド＆インストールする
+   1. taichiをビルド＆インストールする
+7. Genesisをインストールする
 
 
 ## 対象バージョン
@@ -55,28 +77,6 @@ pip install genesis-world
 | -------------- | ------------- | ----- |
 | Jetson Orin NX | Jetpack 5.1.1 |       |
 
-
-## インストール方法
-
-```bash
-# ビルド時にメモリが足りずにこける現象を確認してます。ビルド時のJOBS数を制限してます。
-export MAX_JOBS=4
-
-bash install_genesis_on_aarch64.sh
-```
-
-### 手順
-
-1. cmakeを最新に更新する
-2. Python仮想環境を作成する
-   1. pyenvでpython3.11をインストールする
-   2. venvで仮想環境を作成する
-3. llvmとclangをビルドする
-4. apt管理のソフトをインストールする
-5. pip管理のライブラリをインストールする
-6. pythonのライブラリをビルド＆インストールする
-   1. taichiをビルド＆インストールする
-7. Genesisをインストールする
 
 
 ### その他
