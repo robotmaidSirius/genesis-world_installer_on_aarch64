@@ -1,0 +1,2 @@
+# genesis-world_installer_on_aarch64
+Jetsonなどのaarch64アーキテクチャでgenesisをインストールするためのスクリプト
