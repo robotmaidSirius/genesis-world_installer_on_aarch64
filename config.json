@@ -1,20 +1,18 @@
 {
     "install_path": "${HOME}/genesis",
-    "python_version": "3.11.11",
     "venv_name": "venv_genesis",
     "packages": {
-        "cmake": "0.0.1",
-        "CoACD": "0.0.1",
-        "genesis": "0.0.1",
-        "jetson_opencv": "0.0.1",
-        "jetson_pytorch": "0.0.1",
-        "jetson_torchaudio": "0.0.1",
-        "jetson_torchvision": "0.0.1",
-        "libigl": "0.0.1",
-        "llvm": "0.0.1",
-        "pyenv": "0.0.1",
-        "PyMeshLab": "0.0.1",
-        "taichi": "0.0.1",
-        "tetgen": "0.0.1"
+        "version": {
+            "python": "3.11.11",
+            "cmake": "3.21.3",
+            "llvm": "15.0.5",
+            "CoACD": "1.0.1",
+            "vtk": "9.4.1",
+            "taichi": "1.7.3",
+            "libigl": "2.4.1",
+            "PyMeshLab": "v2023.12.post2",
+            "tetgen": "v0.6.4",
+            "genesis": "v0.2.1"
+        }
     }
 }

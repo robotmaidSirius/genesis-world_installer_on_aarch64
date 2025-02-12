@@ -15,15 +15,23 @@ while [[ $# -gt 0 ]]; do
         INSTALL_VER=$1
         shift;;
     -p=*|--root=*)
-        INSTALL_ROOT=${1#*=}
+        if [ "" != "${1#*=}" ];then
+            INSTALL_ROOT=${1#*=}
+        fi
         shift;;
     -p|--root)
         shift
-        INSTALL_ROOT=$1
+        if [ "" != "$1" ];then
+            INSTALL_ROOT=$1
+        fi
         shift;;
     *) echo "Unknown parameter passed: $1"; shift;;
   esac
 done
+if [ "" == "${INSTALL_VER}" ];then
+    echo "[WARNING] Since no version was specified, the installation was skipped."
+    exit 0
+fi
 INSTALL_URL=https://github.com/libigl/libigl-python-bindings.git
 INSTALL_DIR=${INSTALL_ROOT}/libigl-python-bindings
 RESULT=0
