@@ -39,11 +39,13 @@ fi
 CURRENT_VER=$(clang --version | grep version)
 if [[ "${CURRENT_VER}" =~ "${INSTALL_VER}" ]]; then
     echo "[SKIP] ${CURRENT_VER} is already installed"
+    exit 0
 fi
 
 CURRENT_VER=$(clang++ --version | grep version)
 if [[ "${CURRENT_VER}" =~ "${INSTALL_VER}" ]]; then
     echo "[SKIP] ${CURRENT_VER} is already installed"
+    exit 0
 fi
 
 RESULT=0
