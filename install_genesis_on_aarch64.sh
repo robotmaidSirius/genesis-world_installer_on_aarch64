@@ -1,8 +1,11 @@
 #!/bin/bash
-SCRIPT_DIR=$(cd $(dirname $0); pwd)/script
-CONFIG_FILE=$(cd $(dirname $0); pwd)/config.json
+SCRIPT_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/script
+CONFIG_FILE=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/config.json
 RESULT=0
 export MAX_JOBS=$((`nproc` - 1))
+if [[ ${MAX_JOBS} -le 0 ]]; then
+  export MAX_JOBS=1
+fi
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -28,71 +31,186 @@ while [[ $# -gt 0 ]]; do
 done
 CONFIG_FILE=$(readlink -f ${CONFIG_FILE})
 # ========================================
+function get_jq_value() {
+  local key=${1}
+  local value=$(eval echo $(jq -r '.'${key} ${CONFIG_FILE}));
+  if [ "null" == "${value}" ];then
+    value=""
+  fi
+  echo ${value}
+}
+function flag_jq_value() {
+  local key=${1}
+  local value=$(eval echo $(jq -r '.'${key} ${CONFIG_FILE}));
+  if [ true == "${value}" ];then
+    value=1
+  else
+    value=0
+  fi
+  echo ${value}
+}
+# ========================================
+echo -e "####################\n $0\n####################"
+sudo apt install -y jq fzf
 
-## apt管理のインストール
-bash ${SCRIPT_DIR}/install_apt.sh ${SCRIPT_DIR}/requirements_apt.txt
+# TODO: ここで使用するデバイスの情報を確認する
+
+
+# TODO: カスタムインストールするか確認する
 
 # 環境設定の取得
 if [ -f "${CONFIG_FILE}" ]; then
   # config.jsonからインストールするパッケージを取得
-  INSTALL_ROOT=$(eval echo $(jq -r '.install_path' ${CONFIG_FILE}));
-  PYTHON_VERSION=$(eval echo $(jq -r '.python_version' ${CONFIG_FILE}));
-  ENV_NAME=$(eval echo $(jq -r '.venv_name' ${CONFIG_FILE}));
+  INSTALL_ROOT=$(eval echo $(get_jq_value 'install_path'));
+  PYTHON_VERSION=$(get_jq_value "packages.version.python");
+  ENV_NAME=$(get_jq_value "venv_name");
+  SKIP_APT=$(flag_jq_value "skip_apt");
+  SKIP_PIP=$(flag_jq_value "skip_pip");
 
 else
   RESULT=1
   echo "config.jsonが存在しません"
+  # TODO: config.jsonが無い場合は、デフォルトを生成して実施する？
+  exit 0
+fi
+
+## apt管理のインストール
+if [ ${SKIP_APT} -ne 1 ]; then
+  echo -e "\n==============\n# Install: apt\n=============="
+  bash ${SCRIPT_DIR}/install_apt.sh ${SCRIPT_DIR}/requirements_apt.txt
+  RESULT=$?
+  if [ ${RESULT} -ne 0 ]; then
+    echo "[ERROR] Install 'apt requirements_apt.txt' is failed" >&2
+    exit 0
+  fi
 fi
 
 if [ ${RESULT} -eq 0 ]; then
   ## pyenvのインストール
-  bash ${SCRIPT_DIR}/install_pyenv.sh -v=${PYTHON_VERSION}
+  #bash ${SCRIPT_DIR}/install_pyenv.sh -v=$(get_jq_value "packages.version.python")
 
   mkdir -p ${INSTALL_ROOT}
   # 環境変数を設定
   pushd "${INSTALL_ROOT}" >/dev/null 2>&1
   pyenv local ${PYTHON_VERSION}
-  if [ ! -d "${ENV_NAME}" ]; then
-    python -m venv ${ENV_NAME}
+  if [ "" != ${ENV_NAME} ];then
+    echo -e "\n==============\n# Set venv :${ENV_NAME}\n=============="
+    if [ ! -d "${ENV_NAME}" ]; then
+      python -m venv ${ENV_NAME}
+    fi
+    source ${ENV_NAME}/bin/activate
+    echo "pyenv versions"
+    pyenv versions
   fi
-  source ${ENV_NAME}/bin/activate
     ## ========================================
     # pip管理のインストール処理
     python -m pip install --upgrade pip
     # pip requirements.txtのインストール
-    pip install -r ${SCRIPT_DIR}/requirements.txt
+    if [ ${SKIP_PIP} -ne 1 ]; then
+      echo -e "\n==============\n# pip requirements.txt\n=============="
+      pip install -r ${SCRIPT_DIR}/requirements.txt
+      RESULT=$?
+      if [ ${RESULT} -ne 0 ]; then
+        echo "[ERROR] Install 'pip requirements.txt' is failed" >&2
+        exit 0
+      fi
+    fi
 
     ## ========================================
     ## Install: cmake
-    bash ${SCRIPT_DIR}/install_cmake.sh -v=3.21.3 -p=${INSTALL_ROOT}
+    echo -e "\n==============\n# Install: cmake\n=============="
+    bash ${SCRIPT_DIR}/install_cmake.sh -v=$(get_jq_value "packages.version.cmake") -p=${INSTALL_ROOT}
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'cmake' is failed." >&2
+      exit 0
+    fi
     ## Install: LLVM
-    bash ${SCRIPT_DIR}/install_llvm.sh -v=15.0.5 -p=${INSTALL_ROOT} --tar
+    echo -e "\n==============\n# Install: LLVM\n=============="
+    bash ${SCRIPT_DIR}/install_llvm.sh -v=$(get_jq_value "packages.version.llvm") -p=${INSTALL_ROOT} --tar
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'LLVM' is failed." >&2
+      exit 0
+    fi
     ## Install: CoACD
-    bash ${SCRIPT_DIR}/install_CoACD.sh -v=1.0.1 -p=${INSTALL_ROOT}
+    echo -e "\n==============\n# Install: CoACD\n=============="
+    bash ${SCRIPT_DIR}/install_CoACD.sh -v=$(get_jq_value "packages.version.CoACD") -p=${INSTALL_ROOT}
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'install_CoACD' is failed." >&2
+      exit 0
+    fi
     ## Install: VTK
-    bash ${SCRIPT_DIR}/install_vtk.sh -v=9.4.1 -p=${INSTALL_ROOT}
+    echo -e "\n==============\n# Install: VTK\n=============="
+    bash ${SCRIPT_DIR}/install_vtk.sh -v=$(get_jq_value "packages.version.vtk") -p=${INSTALL_ROOT}
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'VTK' is failed." >&2
+      exit 0
+    fi
 
     ## ========================================
     ## Install: taichi
-    bash ${SCRIPT_DIR}/install_taichi.sh -v=v1.7.3 -p=${INSTALL_ROOT}
+    echo -e "\n==============\n# Install: taichi\n=============="
+    bash ${SCRIPT_DIR}/install_taichi.sh -v=$(get_jq_value "packages.version.taichi") -p=${INSTALL_ROOT} --apply_patch
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'taichi' is failed." >&2
+      exit 0
+    fi
     ## Install: libigl
-    bash ${SCRIPT_DIR}/install_libigl.sh -v=2.4.1 -p=${INSTALL_ROOT}
+    echo -e "\n==============\n# Install: libigl\n=============="
+    bash ${SCRIPT_DIR}/install_libigl.sh -v=$(get_jq_value "packages.version.libigl") -p=${INSTALL_ROOT}
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'libigl' is failed." >&2
+      exit 0
+    fi
     ## Install: PyMeshLab
-    bash ${SCRIPT_DIR}/install_PyMeshLab.sh -v=v2023.12.post2 -p=${INSTALL_ROOT}
+    echo -e "\n==============\n# Install: PyMeshLab\n=============="
+    bash ${SCRIPT_DIR}/install_PyMeshLab.sh -v=$(get_jq_value "packages.version.PyMeshLab") -p=${INSTALL_ROOT}
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'PyMeshLab' is failed." >&2
+      exit 0
+    fi
     ## Install: tetgen
-    bash ${SCRIPT_DIR}/install_tetgen.sh -v=v0.6.4 -p=${INSTALL_ROOT}
+    echo -e "\n==============\n# Install: tetgen\n=============="
+    bash ${SCRIPT_DIR}/install_tetgen.sh -v=$(get_jq_value "packages.version.tetgen") -p=${INSTALL_ROOT}
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'tetgen' is failed." >&2
+      exit 0
+    fi
 
     ## Install: genesis-world
-    bash ${SCRIPT_DIR}/install_genesis.sh -v=v0.2.1 -p=${INSTALL_ROOT}
+    echo -e "\n==============\n# Install: genesis-world\n=============="
+    bash ${SCRIPT_DIR}/install_genesis.sh -v=$(get_jq_value "packages.version.genesis") -p=${INSTALL_ROOT}
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'genesis' is failed." >&2
+      exit 0
+    fi
 
     ## ========================================
     ## Create script
+    echo -e "\n==============\n# Create script\n=============="
     bash ${SCRIPT_DIR}/create_script.sh --env_name=${ENV_NAME}
+    RESULT=$?
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Create script is failed." >&2
+      exit 0
+    fi
 
   popd >/dev/null 2>&1
 
   ## バージョン情報の表示
   bash ${SCRIPT_DIR}/print_ver.sh
 
-  deactivate
+  if [ "" != ${ENV_NAME} ];then
+    deactivate
+  fi
+
+  echo Install path : ${INSTALL_ROOT}
 fi

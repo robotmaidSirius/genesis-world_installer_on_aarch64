@@ -11,4 +11,4 @@ dill
 markdown-it-py
 colorama
 mdurl
-python3-openvdb
+matplotlib

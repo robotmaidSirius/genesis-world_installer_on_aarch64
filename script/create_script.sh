@@ -1,6 +1,5 @@
 #!/bin/bash
-## TODO: --tar オプションが未検証
-INSTALL_VER=0.0.1
+INSTALL_VER=0.0.2
 INSTALL_ROOT=~/genesis
 INSTALL_TYPE_TAR=0
 ENV_NAME=venv_genesis
@@ -20,6 +19,10 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown parameter passed: $1"; shift;;
   esac
 done
+if [ "" == "${ENV_NAME}" ];then
+    echo "[ERROR] Please specify '--env_name'" >&2
+    exit 1
+fi
 RESULT=0
 # ========================================
 CREATE_SCRIPT_ACTIVATE=${INSTALL_ROOT}/activate.sh
@@ -28,6 +31,7 @@ echo '#!/bin/bash' > ${CREATE_SCRIPT_ACTIVATE}
 echo '## Ver.'${INSTALL_VER} >> ${CREATE_SCRIPT_ACTIVATE}
 echo '' >> ${CREATE_SCRIPT_ACTIVATE}
 echo 'source '${ENV_NAME}'/bin/activate' >> ${CREATE_SCRIPT_ACTIVATE}
+echo 'history -s source '${ENV_NAME}'/bin/activate' >> ${CREATE_SCRIPT_ACTIVATE}
 chmod u+x ${CREATE_SCRIPT_ACTIVATE}
 # ========================================
 CREATE_SCRIPT_DEACTIVATE=${INSTALL_ROOT}/deactivate.sh

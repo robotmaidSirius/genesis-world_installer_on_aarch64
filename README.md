@@ -2,15 +2,9 @@
 
 [WARNING]
  * 作成中です。内容が不完全です。
-   * 呼び出しているスクリプト単体でテスト中。インストール手順記載のスクリプトではまだ動かしてない。
    * genesis-worldのインストールは成功
    * venvの環境でpytorchのインストールが出来てない。[CPU版](https://pytorch.org/get-started/locally/)をインストールしている
-
-```bash
-# CPU版のPyTorchをインストールして対応中
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-```
-
+     * NVIDIAが提供している**torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl**が**python 3.8**のため、**python 3.11**でインストールできないか確認中
 
 ## Overview
 
@@ -86,6 +80,8 @@ bash install_genesis_on_aarch64.sh
    * 対策１： ビルド時間がかかるが、```export MAX_JOBS=2```など値を減らし動作させるコア数を減らす
    * 対策２： スワップ領域を増やす。（非推奨：１コアだけで数GB使っている事があるため）
 * ```taichi```は「./build.py」を実施してないが、このスクリプトでインストールするソフトが必要かもしれません
+* pyenvのインストールは任意で実施してもらうようにする
+   * 仮想環境の構築の判断がつかないため
 
 ### Authors and acknowledgment
 

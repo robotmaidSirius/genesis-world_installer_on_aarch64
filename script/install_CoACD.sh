@@ -1,5 +1,5 @@
 #!/bin/bash
-INSTALL_VER=1.0.1
+INSTALL_VER=1.0.5
 INSTALL_ROOT=~/genesis
 
 while [[ $# -gt 0 ]]; do
@@ -15,15 +15,29 @@ while [[ $# -gt 0 ]]; do
         INSTALL_VER=$1
         shift;;
     -p=*|--root=*)
-        INSTALL_ROOT=${1#*=}
+        if [ "" != "${1#*=}" ];then
+            INSTALL_ROOT=${1#*=}
+        fi
         shift;;
     -p|--root)
         shift
-        INSTALL_ROOT=$1
+        if [ "" != "$1" ];then
+            INSTALL_ROOT=$1
+        fi
         shift;;
     *) echo "Unknown parameter passed: $1"; shift;;
   esac
 done
+if [ "" == "${INSTALL_VER}" ];then
+    echo "[WARNING] Since no version was specified, the installation was skipped."
+    exit 0
+fi
+CURRENT_VER=$(pip show coacd | grep Version)
+if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
+    echo "[SKIP] CoACD ${CURRENT_VER} is already installed"
+    exit 0
+fi
+
 INSTALL_URL=https://github.com/SarahWeiii/CoACD.git
 INSTALL_DIR=${INSTALL_ROOT}/CoACD
 RESULT=0
@@ -37,7 +51,7 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
 
     pushd "${INSTALL_DIR}" >/dev/null 2>&1
         #git checkout ${INSTALL_VER}
-        mkdir -p ${INSTALL_DIR}/build
+        #mkdir -p ${INSTALL_DIR}/build
         #pushd "${INSTALL_DIR}/build" >/dev/null 2>&1
         #    cmake .. -DCMAKE_BUILD_TYPE=Release
         #    RESULT=$?

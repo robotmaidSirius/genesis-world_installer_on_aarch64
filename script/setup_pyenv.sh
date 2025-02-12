@@ -15,16 +15,41 @@ while [[ $# -gt 0 ]]; do
         TARGET_PYTHON_VERSION=$1
         shift;;
     -p=*|--root=*)
-        INSTALL_DIR=${1#*=}
+        if [ "" != "${1#*=}" ];then
+            INSTALL_DIR=${1#*=}
+        fi
         shift;;
     -p|--root)
         shift
-        INSTALL_DIR=$1
+        if [ "" != "$1" ];then
+            INSTALL_DIR=$1
+        fi
         shift;;
     *) echo "Unknown parameter passed: $1"; shift;;
   esac
 done
 RESULT=0
+# ========================================
+function install_python() {
+  local version=${1}
+  local ret=0
+  if [ "" != "${version}" ];then
+    cd ~
+    # TODO: インストールが失敗した場合の処理を追加する
+    pyenv install ${version}
+    ret=$?
+    pyenv global ${version}
+    source ~/.bashrc
+  fi
+  if [[ ${ret} -eq 0 ]];then
+    # pipのバージョンをを上げる
+    python -m pip install --upgrade pip
+
+    # Version確認
+    #pyenv versions
+    #python --version
+  fi
+}
 # ========================================
 
 if [ -d "${INSTALL_DIR}" ]; then
@@ -33,6 +58,7 @@ if [ -d "${INSTALL_DIR}" ]; then
   fi
   pyenv update
   echo "pyenvは既にインストールされています"
+  install_python ${TARGET_PYTHON_VERSION}
   exit 0
 fi
 
@@ -41,27 +67,23 @@ sudo apt install -y \
   libssl-dev libncursesw5-dev xz-utils tk-dev liblzma-dev \
   libgdbm-dev libnss3-dev
 
+# TODO: すでに登録されているなら、追加しない
 # リポジトリのクローンと環境変数の設定
 git clone https://github.com/pyenv/pyenv.git ${INSTALL_DIR}
-echo 'export PYENV_ROOT="${HOME}/.pyenv"' >> ~/.bashrc
+echo 'export PYENV_ROOT="'${INSTALL_DIR}'"' >> ~/.bashrc
 echo 'export PATH="${PYENV_ROOT}/bin:$PATH"' >> ~/.bashrc
 echo 'eval "$(pyenv init -)"' >> ~/.bashrc
 source ~/.bashrc
+# pyenvのupdateプラグインをインストール
+git clone https://github.com/pyenv/pyenv-update.git ${INSTALL_DIR}/plugins/pyenv-update
 
 # Pythonのインストール
-cd ~
-pyenv install ${TARGET_PYTHON_VERSION}
-pyenv global ${TARGET_PYTHON_VERSION}
-source ~/.bashrc
+install_python ${TARGET_PYTHON_VERSION}
+RESULT=$?
 
-# 動作
-#pyenv versions
-#python --version
 
-# pipのバージョンをを上げる
-python -m pip install --upgrade pip
-
-# pyenvのupdateプラグインをインストール
-git clone https://github.com/pyenv/pyenv-update.git $(pyenv root)/plugins/pyenv-update
-
-exit ${RESULT}
+if [[ ${RESULT} -eq 0 ]];then
+    echo -e "\nSuccessfully installed pyenv"
+else
+    echo "\nFailed to install pyenv"
+fi

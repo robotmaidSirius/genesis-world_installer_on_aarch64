@@ -19,15 +19,35 @@ while [[ $# -gt 0 ]]; do
         INSTALL_VER=$1
         shift;;
     -p=*|--root=*)
-        INSTALL_ROOT=${1#*=}
+        if [ "" != "${1#*=}" ];then
+            INSTALL_ROOT=${1#*=}
+        fi
         shift;;
     -p|--root)
         shift
-        INSTALL_ROOT=$1
+        if [ "" != "$1" ];then
+            INSTALL_ROOT=$1
+        fi
         shift;;
     *) echo "Unknown parameter passed: $1"; shift;;
   esac
 done
+if [ "" == "${INSTALL_VER}" ];then
+    echo "[WARNING] Since no version was specified, the installation was skipped."
+    exit 0
+fi
+CURRENT_VER=$(clang --version | grep version)
+if [[ "${CURRENT_VER}" =~ "${INSTALL_VER}" ]]; then
+    echo "[SKIP] ${CURRENT_VER} is already installed"
+    exit 0
+fi
+
+CURRENT_VER=$(clang++ --version | grep version)
+if [[ "${CURRENT_VER}" =~ "${INSTALL_VER}" ]]; then
+    echo "[SKIP] ${CURRENT_VER} is already installed"
+    exit 0
+fi
+
 RESULT=0
 # ========================================
 
