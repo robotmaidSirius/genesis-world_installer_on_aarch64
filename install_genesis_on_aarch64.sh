@@ -39,15 +39,19 @@ function get_jq_value() {
   fi
   echo ${value}
 }
-
-## apt管理のインストール
-echo -e "\n==============\n# Install: apt\n=============="
-bash ${SCRIPT_DIR}/install_apt.sh ${SCRIPT_DIR}/requirements_apt.txt
-RESULT=$?
-if [ ${RESULT} -ne 0 ]; then
-  echo "[ERROR] Install 'apt requirements_apt.txt' is failed" >&2
-  exit 0
-fi
+function flag_jq_value() {
+  local key=${1}
+  local value=$(eval echo $(jq -r '.'${key} ${CONFIG_FILE}));
+  if [ true == "${value}" ];then
+    value=1
+  else
+    value=0
+  fi
+  echo ${value}
+}
+# ========================================
+echo -e "####################\n $0\n####################"
+sudo apt install -y jq fzf
 
 # TODO: ここで使用するデバイスの情報を確認する
 
@@ -57,13 +61,28 @@ fi
 # 環境設定の取得
 if [ -f "${CONFIG_FILE}" ]; then
   # config.jsonからインストールするパッケージを取得
-  INSTALL_ROOT=$(eval echo $(jq -r '.install_path' ${CONFIG_FILE}));
+  INSTALL_ROOT=$(eval echo $(get_jq_value 'install_path'));
   PYTHON_VERSION=$(get_jq_value "packages.version.python");
-  ENV_NAME=$(eval echo $(jq -r '.venv_name' ${CONFIG_FILE}));
+  ENV_NAME=$(get_jq_value "venv_name");
+  SKIP_APT=$(flag_jq_value "skip_apt");
+  SKIP_PIP=$(flag_jq_value "skip_pip");
 
 else
   RESULT=1
   echo "config.jsonが存在しません"
+  # TODO: config.jsonが無い場合は、デフォルトを生成して実施する？
+  exit 0
+fi
+
+## apt管理のインストール
+if [ ${SKIP_APT} -ne 1 ]; then
+  echo -e "\n==============\n# Install: apt\n=============="
+  bash ${SCRIPT_DIR}/install_apt.sh ${SCRIPT_DIR}/requirements_apt.txt
+  RESULT=$?
+  if [ ${RESULT} -ne 0 ]; then
+    echo "[ERROR] Install 'apt requirements_apt.txt' is failed" >&2
+    exit 0
+  fi
 fi
 
 if [ ${RESULT} -eq 0 ]; then
@@ -80,17 +99,21 @@ if [ ${RESULT} -eq 0 ]; then
       python -m venv ${ENV_NAME}
     fi
     source ${ENV_NAME}/bin/activate
+    echo "pyenv versions"
+    pyenv versions
   fi
     ## ========================================
     # pip管理のインストール処理
     python -m pip install --upgrade pip
     # pip requirements.txtのインストール
-    echo -e "\n==============\n# pip requirements.txt\n=============="
-    pip install -r ${SCRIPT_DIR}/requirements.txt
-    RESULT=$?
-    if [ ${RESULT} -ne 0 ]; then
-      echo "[ERROR] Install 'pip requirements.txt' is failed" >&2
-      exit 0
+    if [ ${SKIP_PIP} -ne 1 ]; then
+      echo -e "\n==============\n# pip requirements.txt\n=============="
+      pip install -r ${SCRIPT_DIR}/requirements.txt
+      RESULT=$?
+      if [ ${RESULT} -ne 0 ]; then
+        echo "[ERROR] Install 'pip requirements.txt' is failed" >&2
+        exit 0
+      fi
     fi
 
     ## ========================================
@@ -154,7 +177,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: tetgen
     echo -e "\n==============\n# Install: tetgen\n=============="
-    bash ${SCRIPT_DIR}/install_tetgen.sh -v=echo $(get_jq_value "packages.version.tetgen") -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_tetgen.sh -v=$(get_jq_value "packages.version.tetgen") -p=${INSTALL_ROOT}
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'tetgen' is failed." >&2

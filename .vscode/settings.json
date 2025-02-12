@@ -46,6 +46,7 @@
         "libxi",
         "libxinerama",
         "libxrandr",
+        "libzstd",
         "lldb",
         "llvmorg",
         "lxml",

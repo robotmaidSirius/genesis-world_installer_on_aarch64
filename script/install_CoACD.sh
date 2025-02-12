@@ -1,5 +1,5 @@
 #!/bin/bash
-INSTALL_VER=1.0.1
+INSTALL_VER=1.0.5
 INSTALL_ROOT=~/genesis
 
 while [[ $# -gt 0 ]]; do
@@ -51,7 +51,7 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
 
     pushd "${INSTALL_DIR}" >/dev/null 2>&1
         #git checkout ${INSTALL_VER}
-        mkdir -p ${INSTALL_DIR}/build
+        #mkdir -p ${INSTALL_DIR}/build
         #pushd "${INSTALL_DIR}/build" >/dev/null 2>&1
         #    cmake .. -DCMAKE_BUILD_TYPE=Release
         #    RESULT=$?

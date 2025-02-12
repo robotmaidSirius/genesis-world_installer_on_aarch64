@@ -20,3 +20,4 @@ libwayland-bin
 libxcb-ewmh2
 libjemalloc-dev
 python3-openvdb
+libzstd-dev

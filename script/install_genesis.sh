@@ -57,4 +57,4 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
     popd >/dev/null 2>&1
 popd >/dev/null 2>&1
 
-#return ${RESULT}
+exit ${RESULT}

@@ -1,12 +1,14 @@
 {
     "install_path": "${HOME}/genesis",
     "venv_name": "venv_genesis",
+    "skip_apt": false,
+    "skip_pip": false,
     "packages": {
         "version": {
             "python": "3.11.11",
-            "cmake": "3.21.3",
+            "cmake": "3.31.5",
             "llvm": "15.0.5",
-            "CoACD": "1.0.1",
+            "CoACD": "1.0.5",
             "vtk": "9.4.1",
             "taichi": "1.7.3",
             "libigl": "2.4.1",

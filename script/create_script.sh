@@ -19,6 +19,10 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown parameter passed: $1"; shift;;
   esac
 done
+if [ "" == "${ENV_NAME}" ];then
+    echo "[ERROR] Please specify '--env_name'" >&2
+    exit 1
+fi
 RESULT=0
 # ========================================
 CREATE_SCRIPT_ACTIVATE=${INSTALL_ROOT}/activate.sh
@@ -26,7 +30,9 @@ CREATE_SCRIPT_ACTIVATE=${INSTALL_ROOT}/activate.sh
 echo '#!/bin/bash' > ${CREATE_SCRIPT_ACTIVATE}
 echo '## Ver.'${INSTALL_VER} >> ${CREATE_SCRIPT_ACTIVATE}
 echo '' >> ${CREATE_SCRIPT_ACTIVATE}
-echo 'Please call this command: source '${ENV_NAME}'/bin/activate' >> ${CREATE_SCRIPT_ACTIVATE}
+echo 'echo "Please call this command: "' >> ${CREATE_SCRIPT_ACTIVATE}
+echo '' >> ${CREATE_SCRIPT_ACTIVATE}
+echo 'echo "source '${ENV_NAME}'/bin/activate"' >> ${CREATE_SCRIPT_ACTIVATE}
 echo 'history -s source '${ENV_NAME}'/bin/activate' >> ${CREATE_SCRIPT_ACTIVATE}
 chmod u+x ${CREATE_SCRIPT_ACTIVATE}
 # ========================================
