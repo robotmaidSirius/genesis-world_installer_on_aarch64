@@ -32,6 +32,12 @@ if [ "" == "${INSTALL_VER}" ];then
     echo "[WARNING] Since no version was specified, the installation was skipped."
     exit 0
 fi
+CURRENT_VER=$(pip show vtk | grep Version)
+if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
+    echo "[SKIP] vtk ${CURRENT_VER} is already installed"
+    exit 0
+fi
+
 INSTALL_URL=https://www.vtk.org/files/release/${INSTALL_VER%.*}/VTK-${INSTALL_VER}.tar.gz
 INSTALL_DIR=${INSTALL_ROOT}/VTK-${INSTALL_VER}
 RESULT=0

@@ -1,6 +1,5 @@
 #!/bin/bash
-## TODO: --tar オプションが未検証
-INSTALL_VER=0.0.1
+INSTALL_VER=0.0.2
 INSTALL_ROOT=~/genesis
 INSTALL_TYPE_TAR=0
 ENV_NAME=venv_genesis

@@ -32,6 +32,12 @@ if [ "" == "${INSTALL_VER}" ];then
     echo "[WARNING] Since no version was specified, the installation was skipped."
     exit 0
 fi
+CURRENT_VER=$(pkg-config --modversion tbb)
+if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
+    echo "[SKIP] oneTBB ${CURRENT_VER} is already installed"
+    exit 0
+fi
+
 INSTALL_URL=https://github.com/oneapi-src/oneTBB.git
 INSTALL_DIR=${INSTALL_ROOT}/oneTBB
 RESULT=0

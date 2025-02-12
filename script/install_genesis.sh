@@ -33,6 +33,12 @@ if [ "" == "${INSTALL_VER}" ];then
     echo "[WARNING] Since no version was specified, the installation was skipped."
     exit 0
 fi
+CURRENT_VER=$(pip show genesis-world | grep Version)
+if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
+    echo "[SKIP] genesis-world ${CURRENT_VER} is already installed"
+    exit 0
+fi
+
 INSTALL_URL=https://github.com/Genesis-Embodied-AI/Genesis.git
 INSTALL_DIR=${INSTALL_ROOT}/Genesis
 RESULT=0

@@ -36,6 +36,16 @@ if [ "" == "${INSTALL_VER}" ];then
     echo "[WARNING] Since no version was specified, the installation was skipped."
     exit 0
 fi
+CURRENT_VER=$(clang --version | grep version)
+if [[ "${CURRENT_VER}" =~ "${INSTALL_VER}" ]]; then
+    echo "[SKIP] ${CURRENT_VER} is already installed"
+fi
+
+CURRENT_VER=$(clang++ --version | grep version)
+if [[ "${CURRENT_VER}" =~ "${INSTALL_VER}" ]]; then
+    echo "[SKIP] ${CURRENT_VER} is already installed"
+fi
+
 RESULT=0
 # ========================================
 
