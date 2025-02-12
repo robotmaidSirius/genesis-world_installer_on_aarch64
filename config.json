@@ -10,7 +10,7 @@
             "llvm": "15.0.5",
             "CoACD": "1.0.5",
             "vtk": "9.4.1",
-            "taichi": "1.7.3",
+            "taichi": "v1.7.3",
             "libigl": "2.4.1",
             "PyMeshLab": "v2023.12.post2",
             "tetgen": "v0.6.4",
