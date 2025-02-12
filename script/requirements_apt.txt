@@ -16,6 +16,7 @@ libopenvdb-dev
 libghc-memory-dev
 libtbb-dev
 libglfw3
-ibwayland-bin
+libwayland-bin
 libxcb-ewmh2
 libjemalloc-dev
+python3-openvdb

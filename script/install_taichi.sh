@@ -2,12 +2,16 @@
 # TODO: 重複のためが発生したため[python setup.py install]をコメントアウトしたが、ただしか？
 INSTALL_VER=v1.7.3
 INSTALL_ROOT=~/genesis
+INSTALL_APPLY_PATCH=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
         echo "Usage: $0 -v|--ver [version] -p|--root [path]"
         exit 0;;
+    -ap|--apply_patch)
+        INSTALL_APPLY_PATCH=1
+        shift;;
     -v=*|--ver=*)
         INSTALL_VER=${1#*=}
         shift;;
@@ -50,10 +54,14 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
     fi
 
     pushd "${INSTALL_DIR}" >/dev/null 2>&1
-        git checkout .
+        if [ ${INSTALL_APPLY_PATCH} -eq 1 ]; then
+            git checkout .
+        fi
         git checkout ${INSTALL_VER}
         # Patch
-        patch -p 1 < ${SCRIPT_DIR}/misc/taichi_build_ARM.patch
+        if [ ${INSTALL_APPLY_PATCH} -eq 1 ]; then
+            patch -p 1 < ${SCRIPT_DIR}/misc/taichi_build_ARM.patch
+        fi
         # ./build.py
         RESULT=$?
         if [ ${RESULT} -eq 0 ]; then
