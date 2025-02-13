@@ -2,15 +2,11 @@
 ## TODO: インストールできるか未検証
 # Reference:
 ## https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html
+## https://forums.developer.nvidia.com/t/pytorch-for-jetson/72048
+### 'Build from Source'
 
-# export TORCH_INSTALL=https://developer.download.nvidia.com/compute/redist/jp/v511/pytorch/torch-2.0.0a0+fe05266f.nv23.04-cp38-cp38-linux_aarch64.whl
-# python3 -m pip install --upgrade pip; python3 -m pip install numpy; python3 -m pip install --no-cache $TORCH_INSTALL;echo ${TORCH_INSTALL}
-# export TORCH_INSTALL=https://developer.download.nvidia.com/compute/redist/jp/v511/tensorflow/tensorflow-2.12.0+nv23.05-cp38-cp38-linux_aarch64.whl
-# python3 -m pip install --upgrade pip; python3 -m pip install numpy; python3 -m pip install --no-cache $TORCH_INSTALL;echo ${TORCH_INSTALL}
-
-
-PERSONAL_VENV_NAME=genesis
-INSTALL_VER=12.1
+INSTALL_VER=v2.1.0
+INSTALL_NVP_MODEL=0
 INSTALL_ROOT=~/genesis
 
 while [[ $# -gt 0 ]]; do
@@ -18,12 +14,9 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
         echo "Usage: $0 -vn|--venv_name [venv_name] -v|--ver [version] -p|--root [root]"
         exit 0;;
-    -vn=*|--venv_name=*)
-        PERSONAL_VENV_NAME=${1#*=}
-        shift;;
-    -vn|--venv_name)
-        shift
-        PERSONAL_VENV_NAME=$1
+    --max_power)
+        # on Xavier NX, use -m 2 instead (15W 6-core mode)
+        INSTALL_NVP_MODEL=2
         shift;;
     -v=*|--ver=*)
         INSTALL_VER=${1#*=}
@@ -42,50 +35,56 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown parameter passed: $1"; shift;;
   esac
 done
+CURRENT_VER=$(pip show torch | grep Version)
+if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
+    echo "[SKIP] pytorch ${CURRENT_VER} is already installed"
+    exit 0
+fi
+
+INSTALL_URL=http://github.com/pytorch/pytorch
+INSTALL_DIR=${INSTALL_ROOT}/pytorch
+RESULT=0
 # ========================================
 
-# https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform-release-notes/pytorch-jetson-rel.html#pytorch-jetson-rel
-JP_VERSION=61
-PYT_VERSION=torch-2.5.0a0+872d972e41.nv24.08.17622132-cp310-cp310-linux_aarch64
-
-## Change venv
 mkdir -p ${INSTALL_ROOT}
-if [ ! -d "${INSTALL_ROOT}/${PERSONAL_VENV_NAME}" ]; then
-    python -m venv ${INSTALL_ROOT}/${PERSONAL_VENV_NAME}
-fi
-source ${PERSONAL_VENV_NAME}/bin/activate
-
-# Install PyTorch
 pushd "${INSTALL_ROOT}" >/dev/null 2>&1
-    INSTALL_DIR=${INSTALL_ROOT}/jetson/pytorch
-    mkdir -p ${INSTALL_DIR}
-pushd "${INSTALL_DIR}" >/dev/null 2>&1
-    # Prerequisites and Installation
-    ## Install system packages required by PyTorch
-    sudo apt -y update
-    sudo apt install -y python-pip libopenblas-dev
-    # sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev
+    if [ ! -d ${INSTALL_DIR} ]; then
+        git clone --recurse-submodules ${INSTALL_URL} ${INSTALL_DIR}
+    fi
 
-    wget raw.githubusercontent.com/pytorch/pytorch/5c6af2b583709f6176898c017424dc9981023c28/.ci/docker/common/install_cusparselt.sh
-    export CUDA_VERSION=${INSTALL_VER}
-    bash ./install_cusparselt.sh
+    pushd "${INSTALL_DIR}" >/dev/null 2>&1
+        git checkout ${INSTALL_VER}
+        git submodule update --init --recursive
+        # ========================================
+        # Setup environment variables
+        # ========================================
+        export USE_NCCL=0
+        # skip setting this if you want to enable OpenMPI backend
+        export USE_DISTRIBUTED=0
+        export USE_QNNPACK=0
+        export USE_PYTORCH_QNNPACK=0
+        # "7.2;8.7" for JetPack 5 wheels for Xavier/Orin
+        export TORCH_CUDA_ARCH_LIST="7.2;8.7"
+        export PYTORCH_BUILD_VERSION=${INSTALL_VER}
+        export PYTORCH_BUILD_NUMBER=1
 
-    ## install PyTorch
-    export TORCH_URL=https://developer.download.nvidia.com/compute/redist/jp/v$JP_VERSION/pytorch/$PYT_VERSION.whl
-    wget ${TORCH_URL} -O $PYT_VERSION.whl
-    python -m pip install --upgrade pip
-    python -m pip install numpy==’1.26.1’
-    python -m pip install --no-cache ./$PYT_VERSION.whl
+        # ========================================
+        # Change jetson_clocks and nvpmodel
+        # ========================================
+        if [ ${INSTALL_NVP_MODEL} -eq 0 ]; then
+            echo "Skip setting NVP model"
+        else
+            echo "Set NVP model to ${INSTALL_NVP_MODEL}"
+            sudo nvpmodel -m ${INSTALL_NVP_MODEL}
+        fi
+        sudo jetson_clocks
+        # ========================================
+        # Build PyTorch
+        # ========================================
+        python setup.py bdist_wheel
 
-
-
-    pip3 install Cython
-    pip3 install numpy torch-${INSTALL_VER}-cp36-cp36m-linux_aarch64.whl
-
-
+        RESULT=$?
+    popd >/dev/null 2>&1
 popd >/dev/null 2>&1
-popd >/dev/null 2>&1
 
-# Deactivate venv
-deactivate
 exit ${RESULT}

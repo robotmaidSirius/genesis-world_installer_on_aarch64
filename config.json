@@ -16,5 +16,13 @@
             "tetgen": "v0.6.4",
             "genesis": "v0.2.1"
         }
+    },
+    "hardware": {
+        "jetpack5": {
+            "pytorch": "v2.1.0"
+        },
+        "jetpack6": {
+            "pytorch": "v2.3.0"
+        }
     }
 }

@@ -4,6 +4,9 @@ RESULT=0
 
 while read LINE
 do
+  if [ -z "${LINE}" ]; then continue; fi
+  if [[ ${LINE} =~ ^#.* ]]; then continue; fi
+
   export APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
   sudo -E apt install -y ${LINE}
   if [ $? -ne 0 ]; then
