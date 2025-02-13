@@ -56,14 +56,14 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
         pushd "${INSTALL_DIR}/build" >/dev/null 2>&1
             # BUILD LLVM
             cmake .. \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DVTK_WHEEL_BUILD=ON \
-                -DVTK_WRAP_PYTHON=ON \
-                -DVTK_PYTHON_VERSION=3 \
-                -DVTK_GROUP_ENABLE_Rendering=YES \
-                -DVTK_GROUP_ENABLE_Imaging=YES \
-                -DVTK_GROUP_ENABLE_MPI=NO \
-                -DPYTHON_EXECUTABLE=$(which python)
+                -D CMAKE_BUILD_TYPE=Release \
+                -D VTK_WHEEL_BUILD=ON \
+                -D VTK_WRAP_PYTHON=ON \
+                -D VTK_PYTHON_VERSION=3 \
+                -D VTK_GROUP_ENABLE_Rendering=YES \
+                -D VTK_GROUP_ENABLE_Imaging=YES \
+                -D VTK_GROUP_ENABLE_MPI=NO \
+                -D PYTHON_EXECUTABLE=$(which python)
             RESULT=$?
             if [ ${RESULT} -eq 0 ]; then
                 make -j $(nproc)

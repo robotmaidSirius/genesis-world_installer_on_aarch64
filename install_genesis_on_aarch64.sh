@@ -141,7 +141,7 @@ if [ ${RESULT} -eq 0 ]; then
     ## ========================================
     ## Install: cmake
     echo -e "\n==============\n# Install: cmake\n=============="
-    bash ${SCRIPT_DIR}/install_cmake.sh -v=$(get_jq_value "packages.version.cmake") -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_make_cmake.sh -v=$(get_jq_value "packages.version.cmake") -p=${INSTALL_ROOT}
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'cmake' is failed." >&2
@@ -149,7 +149,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: LLVM
     echo -e "\n==============\n# Install: LLVM\n=============="
-    bash ${SCRIPT_DIR}/install_llvm.sh -v=$(get_jq_value "packages.version.llvm") -p=${INSTALL_ROOT} --tar
+    bash ${SCRIPT_DIR}/install_make_llvm.sh -v=$(get_jq_value "packages.version.llvm") -p=${INSTALL_ROOT} --tar
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'LLVM' is failed." >&2
@@ -157,7 +157,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: CoACD
     echo -e "\n==============\n# Install: CoACD\n=============="
-    bash ${SCRIPT_DIR}/install_CoACD.sh -v=$(get_jq_value "packages.version.CoACD") -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_python_CoACD.sh -v=$(get_jq_value "packages.version.CoACD") -p=${INSTALL_ROOT}
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'install_CoACD' is failed." >&2
@@ -165,7 +165,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: VTK
     echo -e "\n==============\n# Install: VTK\n=============="
-    bash ${SCRIPT_DIR}/install_vtk.sh -v=$(get_jq_value "packages.version.vtk") -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_python_vtk.sh -v=$(get_jq_value "packages.version.vtk") -p=${INSTALL_ROOT}
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'VTK' is failed." >&2
@@ -175,7 +175,7 @@ if [ ${RESULT} -eq 0 ]; then
     ## ========================================
     ## Install: taichi
     echo -e "\n==============\n# Install: taichi\n=============="
-    bash ${SCRIPT_DIR}/install_taichi.sh -v=$(get_jq_value "packages.version.taichi") -p=${INSTALL_ROOT} --apply_patch
+    bash ${SCRIPT_DIR}/install_python_taichi.sh -v=$(get_jq_value "packages.version.taichi") -p=${INSTALL_ROOT} --apply_patch
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'taichi' is failed." >&2
@@ -183,7 +183,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: libigl
     echo -e "\n==============\n# Install: libigl\n=============="
-    bash ${SCRIPT_DIR}/install_libigl.sh -v=$(get_jq_value "packages.version.libigl") -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_python_libigl.sh -v=$(get_jq_value "packages.version.libigl") -p=${INSTALL_ROOT}
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'libigl' is failed." >&2
@@ -191,7 +191,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: PyMeshLab
     echo -e "\n==============\n# Install: PyMeshLab\n=============="
-    bash ${SCRIPT_DIR}/install_PyMeshLab.sh -v=$(get_jq_value "packages.version.PyMeshLab") -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_python_PyMeshLab.sh -v=$(get_jq_value "packages.version.PyMeshLab") -p=${INSTALL_ROOT}
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'PyMeshLab' is failed." >&2
@@ -199,7 +199,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: tetgen
     echo -e "\n==============\n# Install: tetgen\n=============="
-    bash ${SCRIPT_DIR}/install_tetgen.sh -v=$(get_jq_value "packages.version.tetgen") -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_python_tetgen.sh -v=$(get_jq_value "packages.version.tetgen") -p=${INSTALL_ROOT}
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'tetgen' is failed." >&2
@@ -208,7 +208,7 @@ if [ ${RESULT} -eq 0 ]; then
 
     ## Install: genesis-world
     echo -e "\n==============\n# Install: genesis-world\n=============="
-    bash ${SCRIPT_DIR}/install_genesis.sh -v=$(get_jq_value "packages.version.genesis") -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_python_genesis.sh -v=$(get_jq_value "packages.version.genesis") -p=${INSTALL_ROOT}
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'genesis' is failed." >&2
