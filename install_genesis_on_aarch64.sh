@@ -66,6 +66,7 @@ if [ -f "${CONFIG_FILE}" ]; then
   ENV_NAME=$(get_jq_value "venv_name");
   SKIP_APT=$(flag_jq_value "skip_apt");
   SKIP_PIP=$(flag_jq_value "skip_pip");
+  INSTALL_PYENV=$(flag_jq_value "pyenv.install");
 
 else
   RESULT=1
@@ -86,12 +87,29 @@ if [ ${SKIP_APT} -ne 1 ]; then
 fi
 
 if [ ${RESULT} -eq 0 ]; then
-  ## pyenvのインストール
-  #bash ${SCRIPT_DIR}/install_pyenv.sh -v=$(get_jq_value "packages.version.python")
-
   mkdir -p ${INSTALL_ROOT}
   # 環境変数を設定
   pushd "${INSTALL_ROOT}" >/dev/null 2>&1
+  # pyenvの設定
+  export PYENV_ROOT=$(eval echo $(get_jq_value "pyenv.path"))
+  export PATH="${PYENV_ROOT}/bin:$PATH"
+  eval "$(pyenv init -)"
+  PYENV_VERSION=$(pyenv --version)
+  if [ "command not found" == "${PYENV_VERSION}" ]; then
+    if [ ${INSTALL_PYENV} -eq 1 ]; then
+      ## pyenvのインストール
+      echo -e "\n==============\n# Install: pyenv\n=============="
+      bash ${SCRIPT_DIR}/setup_pyenv.sh --python_version=$(get_jq_value "packages.version.python") -p=${PYENV_ROOT}
+      RESULT=$?
+    else
+      RESULT=1
+    fi
+    if [ ${RESULT} -ne 0 ]; then
+      echo "[ERROR] Install 'pyenv' is failed" >&2
+      exit 0
+    fi
+  fi
+
   pyenv local ${PYTHON_VERSION}
   if [ "" != ${ENV_NAME} ];then
     echo -e "\n==============\n# Set venv :${ENV_NAME}\n=============="
@@ -101,6 +119,10 @@ if [ ${RESULT} -eq 0 ]; then
     source ${ENV_NAME}/bin/activate
     echo "pyenv versions"
     pyenv versions
+    if [ ! -e ${ENV_NAME}/bin/activate ]; then
+      echo "[ERROR] Not found 'activate' script" >&2
+      exit 0
+    fi
   fi
     ## ========================================
     # pip管理のインストール処理
@@ -196,7 +218,7 @@ if [ ${RESULT} -eq 0 ]; then
     ## ========================================
     ## Create script
     echo -e "\n==============\n# Create script\n=============="
-    bash ${SCRIPT_DIR}/create_script.sh --env_name=${ENV_NAME}
+    bash ${SCRIPT_DIR}/create_script.sh --env_name=${ENV_NAME} --pyenv_dir=$(eval echo $(get_jq_value "pyenv.path"))
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Create script is failed." >&2

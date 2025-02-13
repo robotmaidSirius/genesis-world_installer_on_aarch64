@@ -1,16 +1,20 @@
 #!/bin/bash
 TARGET_PYTHON_VERSION=3.11.11
 INSTALL_DIR=${HOME}/.pyenv
+INSTALL_ADD_BASHRC=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
         echo "Usage: $0 -v|--ver [version] -p|--root [path]"
         exit 0;;
-    -v=*|--ver=*)
+    --write_bashrc)
+        INSTALL_ADD_BASHRC=1
+        shift;;
+    -v=*|--python_version=*)
         TARGET_PYTHON_VERSION=${1#*=}
         shift;;
-    -v|--ver)
+    -v|--python_version)
         shift
         TARGET_PYTHON_VERSION=$1
         shift;;
@@ -30,7 +34,7 @@ while [[ $# -gt 0 ]]; do
 done
 RESULT=0
 # ========================================
-function install_python() {
+function install_pyenv_python() {
   local version=${1}
   local ret=0
   if [ "" != "${version}" ];then
@@ -38,8 +42,9 @@ function install_python() {
     # TODO: インストールが失敗した場合の処理を追加する
     pyenv install ${version}
     ret=$?
-    pyenv global ${version}
-    source ~/.bashrc
+    if [ ! -e "~/.python-version" ];then
+      pyenv global ${version}
+    fi
   fi
   if [[ ${ret} -eq 0 ]];then
     # pipのバージョンをを上げる
@@ -70,17 +75,23 @@ sudo apt install -y \
 # TODO: すでに登録されているなら、追加しない
 # リポジトリのクローンと環境変数の設定
 git clone https://github.com/pyenv/pyenv.git ${INSTALL_DIR}
-echo 'export PYENV_ROOT="'${INSTALL_DIR}'"' >> ~/.bashrc
-echo 'export PATH="${PYENV_ROOT}/bin:$PATH"' >> ~/.bashrc
-echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-source ~/.bashrc
+
+if [ ${INSTALL_ADD_BASHRC} -ne 0 ];then
+  echo 'export PYENV_ROOT="'${INSTALL_DIR}'"' >> ~/.bashrc
+  echo 'export PATH="${PYENV_ROOT}/bin:$PATH"' >> ~/.bashrc
+  echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+  source ~/.bashrc
+fi
+export PYENV_ROOT="${INSTALL_DIR}"
+export PATH="${PYENV_ROOT}/bin:$PATH"
+eval "$(pyenv init -)"
+
 # pyenvのupdateプラグインをインストール
 git clone https://github.com/pyenv/pyenv-update.git ${INSTALL_DIR}/plugins/pyenv-update
 
 # Pythonのインストール
-install_python ${TARGET_PYTHON_VERSION}
+install_pyenv_python ${TARGET_PYTHON_VERSION}
 RESULT=$?
-
 
 if [[ ${RESULT} -eq 0 ]];then
     echo -e "\nSuccessfully installed pyenv"

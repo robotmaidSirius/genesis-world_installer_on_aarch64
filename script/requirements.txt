@@ -13,4 +13,3 @@ colorama
 mdurl
 matplotlib
 ninja
-python3-venv
