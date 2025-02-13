@@ -64,8 +64,8 @@ if [ -f "${CONFIG_FILE}" ]; then
   INSTALL_ROOT=$(eval echo $(get_jq_value 'install_path'));
   PYTHON_VERSION=$(get_jq_value "packages.version.python");
   ENV_NAME=$(get_jq_value "venv_name");
-  SKIP_APT=$(flag_jq_value "skip_apt");
-  SKIP_PIP=$(flag_jq_value "skip_pip");
+  SKIP_APT=$(flag_jq_value "packages.skip.apt");
+  SKIP_PIP=$(flag_jq_value "packages.skip.pip");
   INSTALL_PYENV=$(flag_jq_value "pyenv.install");
 
 else

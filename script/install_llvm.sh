@@ -94,12 +94,11 @@ popd >/dev/null 2>&1
 if [ ${RESULT} -eq 0 ]; then
     # Check your LLVM installation
     ## You should get 15.0.5
-    llvm-config --version
+    echo "llvm-config: "$(llvm-config --version)
     clang --version
-    clang++ --version
-
-    # ビルドターゲットを確認する
     clang --print-targets
+    #clang++ --version
+    #clang++ --print-targets
 fi
 
 exit ${RESULT}

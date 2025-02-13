@@ -1,14 +1,16 @@
 {
     "install_path": "${HOME}/genesis",
     "venv_name": "venv_genesis",
-    "skip_apt": false,
-    "skip_pip": false,
     "pyenv": {
         "install": true,
         "path": "${HOME}/.pyenv",
         "write_bashrc": false
     },
     "packages": {
+        "skip": {
+            "apt": true,
+            "pip": true
+        },
         "version": {
             "python": "3.11.11",
             "cmake": "3.31.5",

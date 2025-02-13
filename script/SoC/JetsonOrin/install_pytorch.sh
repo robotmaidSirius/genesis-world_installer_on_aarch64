@@ -65,7 +65,7 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
         export USE_PYTORCH_QNNPACK=0
         # "7.2;8.7" for JetPack 5 wheels for Xavier/Orin
         export TORCH_CUDA_ARCH_LIST="7.2;8.7"
-        export PYTORCH_BUILD_VERSION=${INSTALL_VER}
+        export PYTORCH_BUILD_VERSION=${INSTALL_VER#v}
         export PYTORCH_BUILD_NUMBER=1
 
         # ========================================
