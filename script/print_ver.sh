@@ -17,7 +17,10 @@ lsb_release -a
 #cat /etc/os-release
 
 echo ========================================
-jetson_release | sed 's/\x1B\[[0-9;]*m//g'
+PRINT_TEXT=$(which jetson_release)
+if [ "" != "${PRINT_TEXT}" ];then
+    jetson_release | sed 's/\x1B\[[0-9;]*m//g'
+fi
 # apt show nvidia-jetpack
 
 echo ========================================
