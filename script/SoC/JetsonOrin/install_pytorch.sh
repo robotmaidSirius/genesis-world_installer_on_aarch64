@@ -82,8 +82,23 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
         # Build PyTorch
         # ========================================
         python setup.py bdist_wheel
-
+        # pip install .
         RESULT=$?
+        DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/../dist
+        mkdir -p ${DIST_DIR}
+        if [ ${RESULT} -eq 0 ]; then
+            mkdir -p ${DIST_DIR}
+            cp -f ./dist/* ${DIST_DIR}
+            files=(`ls -1 dist/*.whl`)
+            for file_name in "${files[@]}"; do
+                echo ${file_name}
+                pip install --no-cache ${file_name}
+                RESULT=$?
+                if [ ${RESULT} -ne 0 ]; then
+                    break
+                fi
+            done
+        fi
     popd >/dev/null 2>&1
 popd >/dev/null 2>&1
 

@@ -4,7 +4,7 @@
 INSTALL_VER=v1.7.3
 INSTALL_ROOT=~/genesis
 INSTALL_APPLY_PATCH=0
-DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/../dist
+DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/dist
 FORCE_REINSTALL=0
 
 while [[ $# -gt 0 ]]; do
@@ -95,6 +95,7 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
             python setup.py bdist_wheel
             RESULT=$?
             if [ ${RESULT} -eq 0 ]; then
+                mkdir -p ${DIST_DIR}
                 cp -f ./dist/* ${DIST_DIR}
                 files=(`ls -1 dist/*.whl`)
                 for file_name in "${files[@]}"; do

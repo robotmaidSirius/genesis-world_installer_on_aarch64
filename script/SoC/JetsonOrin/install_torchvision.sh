@@ -1,13 +1,19 @@
 #!/bin/bash
-## TODO: Installation is unverified
-INSTALL_VER=v0.21.0
+## BUILD TYPE: python bdist_wheel
+INSTALL_VER=v0.16.2
 INSTALL_ROOT=~/genesis
+DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/dist
+FORCE_REINSTALL=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
         echo "Usage: $0 -v|--ver [version] -p|--root [path]"
         exit 0;;
+    --force-reinstall)
+        echo "[MESS] force reinstall"
+        FORCE_REINSTALL=1
+        shift;;
     -v=*|--ver=*)
         INSTALL_VER=${1#*=}
         shift;;
@@ -16,28 +22,79 @@ while [[ $# -gt 0 ]]; do
         INSTALL_VER=$1
         shift;;
     -p=*|--root=*)
-        INSTALL_ROOT=${1#*=}
+        if [ "" != "${1#*=}" ];then
+            INSTALL_ROOT=${1#*=}
+        fi
         shift;;
     -p|--root)
         shift
-        INSTALL_ROOT=$1
+        if [ "" != "$1" ];then
+            INSTALL_ROOT=$1
+        fi
+        shift;;
+    -d=*|--dist=*)
+        if [ "" != "${1#*=}" ];then
+            DIST_DIR=${1#*=}
+        fi
+        shift;;
+    -d|--dist)
+        shift
+        if [ "" != "$1" ];then
+            DIST_DIR=$1
+        fi
         shift;;
     *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
+if [ "" == "${INSTALL_VER}" ];then
+    echo "[WARNING] Since no version was specified, the installation was skipped." >&2
+    exit 0
+fi
+if [[ ${FORCE_REINSTALL} -ne 1 ]]; then
+    CURRENT_VER=$(pip show vision | grep Version)
+    if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
+        echo "[SKIP] torchvision ${CURRENT_VER} is already installed"
+        exit 0
+    fi
+fi
+
+INSTALL_URL=https://github.com/pytorch/vision
+INSTALL_DIR=${INSTALL_ROOT}/torchvision
+RESULT=0
+# ========================================
+#sudo apt-get install libjpeg-dev zlib1g-dev libpython3-dev libopenblas-dev libavcodec-dev libavformat-dev libswscale-dev
+# ========================================
+export USE_CUDA=1
+export BUILD_SOX=1
+export BUILD_RNNT=1
+export USE_FFMPEG=1
 # ========================================
 
 mkdir -p ${INSTALL_ROOT}
 pushd "${INSTALL_ROOT}" >/dev/null 2>&1
-    # https://forums.developer.nvidia.com/t/pytorch-for-jetson/72048
+    if [ ! -d ${INSTALL_DIR} ]; then
+        git clone --recurse-submodules ${INSTALL_URL} ${INSTALL_DIR}
+    fi
 
-    sudo apt-get install libjpeg-dev zlib1g-dev libpython3-dev libopenblas-dev libavcodec-dev libavformat-dev libswscale-dev
-    git clone --branch ${INSTALL_VER} https://github.com/pytorch/vision torchvision
-    cd torchvision
-    export BUILD_VERSION=${INSTALL_VER}
-    python setup.py install
-    #cd ../
-    #pip install 'pillow<7'
+    pushd "${INSTALL_DIR}" >/dev/null 2>&1
+        rm -rf ./dist
+        git checkout ${INSTALL_VER}
+        python setup.py bdist_wheel
+        RESULT=$?
+        if [ ${RESULT} -eq 0 ]; then
+            mkdir -p ${DIST_DIR}
+            cp -f ./dist/* ${DIST_DIR}
+            files=(`ls -1 dist/*.whl`)
+            for file_name in "${files[@]}"; do
+                echo ${file_name}
+                pip install --no-cache ${file_name}
+                RESULT=$?
+                if [ ${RESULT} -ne 0 ]; then
+                    break
+                fi
+            done
+        fi
+    popd >/dev/null 2>&1
 popd >/dev/null 2>&1
 
 exit ${RESULT}

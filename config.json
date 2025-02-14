@@ -2,6 +2,7 @@
     "reinstall": false,
     "install_path": "${HOME}/genesis",
     "venv_name": "venv_genesis",
+    "soc": "jetpack5",
     "pyenv": {
         "install": true,
         "path": "${HOME}/.pyenv",
@@ -27,10 +28,14 @@
     },
     "hardware": {
         "jetpack5": {
-            "pytorch": "v2.1.0"
+            "pytorch": "v2.1.2",
+            "torchvision": "v0.16.2",
+            "torchaudio": "v2.1.2"
         },
         "jetpack6": {
-            "pytorch": "v2.3.0"
+            "pytorch": "v2.3.1",
+            "torchvision": "v0.18.1",
+            "torchaudio": "v2.3.1"
         }
     }
 }
