@@ -80,7 +80,7 @@ fi
 ## Install via apt
 if [ ${SKIP_APT} -ne 1 ]; then
   echo -e "\n==============\n# Install: apt\n=============="
-  bash ${SCRIPT_DIR}/install_apt.sh ${SCRIPT_DIR}/requirements_apt.txt
+  bash ${SCRIPT_DIR}/install_apt.sh ${SCRIPT_DIR}/requirements_apt.txt --continue_on_error
   RESULT=$?
   if [ ${RESULT} -ne 0 ]; then
     echo "[ERROR] Install 'apt requirements_apt.txt' failed" >&2
@@ -97,7 +97,7 @@ if [ ${RESULT} -eq 0 ]; then
   export PATH="${PYENV_ROOT}/bin:$PATH"
   eval "$(pyenv init -)"
   PYENV_VERSION=$(pyenv --version)
-  if [ "command not found" == "${PYENV_VERSION}" ]; then
+  if [ "" == "${PYENV_VERSION}" ]; then
     if [ ${INSTALL_PYENV} -eq 1 ]; then
       ## Install pyenv
       echo -e "\n==============\n# Install: pyenv\n=============="

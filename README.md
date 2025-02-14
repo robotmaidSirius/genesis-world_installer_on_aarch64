@@ -83,6 +83,10 @@ bash install_genesis_on_aarch64.sh
 * ```taichi```は「./build.py」を実施してないが、このスクリプトでインストールするソフトが必要かもしれません
 * pyenvのインストールは任意で実施してもらうようにする
   * 仮想環境の構築の判断がつかないため
+* Raspberry Pi 4B(Ubuntu 22.04)でのコンパイルについて、apt管理しているライブラリでバージョン問題を確認してます。
+  * 手動で以下をインストールしてます。
+    * libstdc++-11-dev
+    * cython3
 
 ### ToDo
 
