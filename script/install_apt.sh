@@ -9,7 +9,13 @@ while [[ $# -gt 0 ]]; do
         shift
         CONTINUE_ON_ERROR=1
         shift;;
-    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
+    *)
+        if [ -e $1 ]; then
+          REQUIREMENTS_TEXT=$1
+        else
+          echo "[WARNING] Unknown parameter passed: $1" >&2;
+        fi
+        shift;;
   esac
 done
 
@@ -20,7 +26,7 @@ do
 
   export APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
   echo -e "#####################\n[APT] Install '${LINE}'\n#####################"
-  sudo -E apt install -y ${LINE}
+  sudo -E apt-get install -y ${LINE}
   if [ $? -ne 0 ]; then
     RESULT=1
     if [ ${CONTINUE_ON_ERROR} -eq 1 ]; then

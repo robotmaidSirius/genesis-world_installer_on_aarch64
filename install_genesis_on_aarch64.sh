@@ -52,7 +52,7 @@ function flag_jq_value() {
 }
 # ========================================
 echo -e "####################\n $0\n####################"
-sudo apt install -y jq fzf
+sudo apt-get install -y jq fzf
 
 # TODO: Confirm custom installation?
 
