@@ -119,8 +119,9 @@ if [ ${RESULT} -eq 0 ]; then
       python -m venv ${ENV_NAME}
     fi
     source ${ENV_NAME}/bin/activate
-    echo "pyenv versions"
-    pyenv versions
+    echo "* Virtual environment: ${VIRTUAL_ENV_PROMPT}"
+    echo "* Shims version      : $(pyenv version-name)"
+    echo "* Version file       : $(pyenv version-file)"
     if [ ! -e ${ENV_NAME}/bin/activate ]; then
       echo "[ERROR] 'activate' script not found" >&2
       exit 0
