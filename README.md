@@ -1,10 +1,11 @@
 # genesis-world_installer_on_aarch64
 
-[WARNING]
- * 作成中です。内容が不完全です。
-   * genesis-worldのインストールは成功
-   * venvの環境でpytorchのインストールが出来てない。[CPU版](https://pytorch.org/get-started/locally/)をインストールしている
-     * NVIDIAが提供している**torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl**が**python 3.8**のため、**python 3.11**でインストールできないか確認中
+* [CAUTION]
+  * 作成中です。内容が不完全です。
+    * genesis-worldのインストールは成功
+    * ビルドに時間がかかるため、python 3.11 の環境でビルド済みファイルを作成してテストしてます
+    * venvの環境でpytorchのインストールが出来てない。[CPU版](https://pytorch.org/get-started/locally/)をインストールしている
+      * NVIDIAが提供している**torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl**が**python 3.8**のため、**python 3.11**で再ビルド中
 
 ## Overview
 
@@ -77,11 +78,18 @@ bash install_genesis_on_aarch64.sh
 
 * メモリは8GB以上を推奨します。それ以下の場合は、スワップ領域を確保してください。
 * libiglのビルド時には、メモリが足りない場合があります。
-   * 対策１： ビルド時間がかかるが、```export MAX_JOBS=2```など値を減らし動作させるコア数を減らす
-   * 対策２： スワップ領域を増やす。（非推奨：１コアだけで数GB使っている事があるため）
+  * 対策１： ビルド時間がかかるが、```export MAX_JOBS=2```など値を減らし動作させるコア数を減らす
+  * 対策２： スワップ領域を増やす。（非推奨：１コアだけで数GB使っている事があるため）
 * ```taichi```は「./build.py」を実施してないが、このスクリプトでインストールするソフトが必要かもしれません
 * pyenvのインストールは任意で実施してもらうようにする
-   * 仮想環境の構築の判断がつかないため
+  * 仮想環境の構築の判断がつかないため
+
+### ToDo
+
+* [ ] "genesis-world v0.2.1(tag)"はsetup.pyがないため、mainブランチで実施。v0.2.2以以降からスクリプトのコメントアウトを外せるはず
+* [ ] cmakeのインストールは aptで実施している。tarのオプションを検証する
+* [ ] LLVM-15のインストールにすごく時間がかかる。apt管理のLLVMで対応できるか検証する
+* [ ] pytorchなどのSoC毎のスクリプトの動作確認をする
 
 ### Authors and acknowledgment
 

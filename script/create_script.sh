@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
             INSTALL_PYENV_DIR=$1
         fi
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 if [ "" == "${ENV_NAME}" ];then

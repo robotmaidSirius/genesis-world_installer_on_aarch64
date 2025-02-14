@@ -29,7 +29,7 @@ while [[ $# -gt 0 ]]; do
             INSTALL_DIR=$1
         fi
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 RESULT=0
@@ -39,7 +39,6 @@ function install_pyenv_python() {
   local ret=0
   if [ "" != "${version}" ];then
     cd ~
-    # TODO: インストールが失敗した場合の処理を追加する
     pyenv install ${version}
     ret=$?
     if [ ! -e "~/.python-version" ];then
@@ -47,13 +46,14 @@ function install_pyenv_python() {
     fi
   fi
   if [[ ${ret} -eq 0 ]];then
-    # pipのバージョンをを上げる
+    # upgrade pip
     python -m pip install --upgrade pip
 
-    # Version確認
+    # Check the installed version
     #pyenv versions
     #python --version
   fi
+  return ${ret}
 }
 # ========================================
 
@@ -62,7 +62,7 @@ if [ -d "${INSTALL_DIR}" ]; then
     pyenv update
   fi
   pyenv update
-  echo "pyenvは既にインストールされています"
+  echo "pyenv is already installed"
   install_python ${TARGET_PYTHON_VERSION}
   exit 0
 fi
@@ -72,11 +72,13 @@ sudo apt install -y \
   libssl-dev libncursesw5-dev xz-utils tk-dev liblzma-dev \
   libgdbm-dev libnss3-dev
 
-# TODO: すでに登録されているなら、追加しない
-# リポジトリのクローンと環境変数の設定
-git clone https://github.com/pyenv/pyenv.git ${INSTALL_DIR}
+if [ ! -e ${INSTALL_DIR} ];then
+  # Clone pyenv
+  git clone https://github.com/pyenv/pyenv.git ${INSTALL_DIR}
+fi
 
 if [ ${INSTALL_ADD_BASHRC} -ne 0 ];then
+  # Set Environment Variables
   echo 'export PYENV_ROOT="'${INSTALL_DIR}'"' >> ~/.bashrc
   echo 'export PATH="${PYENV_ROOT}/bin:$PATH"' >> ~/.bashrc
   echo 'eval "$(pyenv init -)"' >> ~/.bashrc
@@ -86,10 +88,10 @@ export PYENV_ROOT="${INSTALL_DIR}"
 export PATH="${PYENV_ROOT}/bin:$PATH"
 eval "$(pyenv init -)"
 
-# pyenvのupdateプラグインをインストール
+# Install pyenv-update
 git clone https://github.com/pyenv/pyenv-update.git ${INSTALL_DIR}/plugins/pyenv-update
 
-# Pythonのインストール
+# Install python on pyenv
 install_pyenv_python ${TARGET_PYTHON_VERSION}
 RESULT=$?
 

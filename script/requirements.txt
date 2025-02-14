@@ -13,3 +13,4 @@ colorama
 mdurl
 matplotlib
 ninja
+cython

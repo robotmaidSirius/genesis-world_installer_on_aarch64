@@ -1,12 +1,19 @@
 #!/bin/bash
+## BUILD TYPE: python bdist_wheel
 INSTALL_VER=v2023.12.post2
 INSTALL_ROOT=~/genesis
+DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/../dist
+FORCE_REINSTALL=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
         echo "Usage: $0 -v|--ver [version] -p|--root [path]"
         exit 0;;
+    --force-reinstall)
+        echo "[MESS] force reinstall"
+        FORCE_REINSTALL=1
+        shift;;
     -v=*|--ver=*)
         INSTALL_VER=${1#*=}
         shift;;
@@ -25,20 +32,32 @@ while [[ $# -gt 0 ]]; do
             INSTALL_ROOT=$1
         fi
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    -d=*|--dist=*)
+        if [ "" != "${1#*=}" ];then
+            DIST_DIR=${1#*=}
+        fi
+        shift;;
+    -d|--dist)
+        shift
+        if [ "" != "$1" ];then
+            DIST_DIR=$1
+        fi
+        shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 if [ "" == "${INSTALL_VER}" ];then
-    echo "[WARNING] Since no version was specified, the installation was skipped."
+    echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
 fi
-CURRENT_VER=$(pip show pymeshlab | grep Version)
-if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
-    echo "[SKIP] PyMeshLab ${CURRENT_VER} is already installed"
-    exit 0
+if [[ ${FORCE_REINSTALL} -ne 1 ]]; then
+    CURRENT_VER=$(pip show pymeshlab | grep Version)
+    if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
+        echo "[SKIP] PyMeshLab ${CURRENT_VER} is already installed"
+        exit 0
+    fi
 fi
 
-SCRIPT_DIR=$(cd $(dirname $0); pwd)
 INSTALL_URL=https://github.com/cnr-isti-vclab/PyMeshLab.git
 INSTALL_DIR=${INSTALL_ROOT}/PyMeshLab
 RESULT=0
@@ -51,9 +70,22 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
     fi
 
     pushd "${INSTALL_DIR}" >/dev/null 2>&1
+        rm -rf ./dist
         git checkout ${INSTALL_VER}
-        pip install ./
+        python setup.py bdist_wheel
         RESULT=$?
+        if [ ${RESULT} -eq 0 ]; then
+            cp -f ./dist/* ${DIST_DIR}
+            files=(`ls -1 dist/*.whl`)
+            for file_name in "${files[@]}"; do
+                echo ${file_name}
+                pip install --no-cache ${file_name}
+                RESULT=$?
+                if [ ${RESULT} -ne 0 ]; then
+                    break
+                fi
+            done
+        fi
     popd >/dev/null 2>&1
 popd >/dev/null 2>&1
 

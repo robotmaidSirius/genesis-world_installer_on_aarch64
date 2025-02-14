@@ -62,6 +62,7 @@ if [[ ${RESULT} -eq 0 ]];then
     echo "    torchvision Usage : $(python -c "import torchvision;print(torchvision.__version__);")"
     echo "    torchaudio Usage  : $(python -c "import torchaudio;print(torchaudio.__version__);")"
 else
+    echo "* pytorch Usage       : NOT installed"
     echo "[ERROR] pytorch is not installed." >&2
 fi
 echo "* OpenCV Usage        : $(python -c "import cv2;print(cv2.__version__);")"

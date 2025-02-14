@@ -1,4 +1,5 @@
 {
+    "reinstall": false,
     "install_path": "${HOME}/genesis",
     "venv_name": "venv_genesis",
     "pyenv": {
@@ -8,8 +9,8 @@
     },
     "packages": {
         "skip": {
-            "apt": true,
-            "pip": true
+            "apt": false,
+            "pip": false
         },
         "version": {
             "python": "3.11.11",

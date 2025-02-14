@@ -1,12 +1,19 @@
 #!/bin/bash
+## BUILD TYPE: python bdist_wheel
 INSTALL_VER=1.0.5
 INSTALL_ROOT=~/genesis
+DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/../dist
+FORCE_REINSTALL=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
         echo "Usage: $0 -v|--ver [version] -p|--root [path]"
         exit 0;;
+    --force-reinstall)
+        echo "[MESS] force reinstall"
+        FORCE_REINSTALL=1
+        shift;;
     -v=*|--ver=*)
         INSTALL_VER=${1#*=}
         shift;;
@@ -25,17 +32,30 @@ while [[ $# -gt 0 ]]; do
             INSTALL_ROOT=$1
         fi
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    -d=*|--dist=*)
+        if [ "" != "${1#*=}" ];then
+            DIST_DIR=${1#*=}
+        fi
+        shift;;
+    -d|--dist)
+        shift
+        if [ "" != "$1" ];then
+            DIST_DIR=$1
+        fi
+        shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 if [ "" == "${INSTALL_VER}" ];then
-    echo "[WARNING] Since no version was specified, the installation was skipped."
+    echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
 fi
-CURRENT_VER=$(pip show coacd | grep Version)
-if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
-    echo "[SKIP] CoACD ${CURRENT_VER} is already installed"
-    exit 0
+if [[ ${FORCE_REINSTALL} -ne 1 ]]; then
+    CURRENT_VER=$(pip show coacd | grep Version)
+    if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
+        echo "[SKIP] CoACD ${CURRENT_VER} is already installed"
+        exit 0
+    fi
 fi
 
 INSTALL_URL=https://github.com/SarahWeiii/CoACD.git
@@ -50,21 +70,23 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
     fi
 
     pushd "${INSTALL_DIR}" >/dev/null 2>&1
+        rm -rf ./dist
+        # TODO: not sure if this is necessary, because repository is not set tag.
         #git checkout ${INSTALL_VER}
-        #mkdir -p ${INSTALL_DIR}/build
-        #pushd "${INSTALL_DIR}/build" >/dev/null 2>&1
-        #    cmake .. -DCMAKE_BUILD_TYPE=Release
-        #    RESULT=$?
-        #    if [ ${RESULT} -eq 0 ]; then
-        #        make main -j $(nproc)
-        #        RESULT=$?
-        #    fi
-        #    #if [ ${RESULT} -eq 0 ]; then
-        #    #    sudo make main install
-        #    #    RESULT=$?
-        #    #fi
-        #popd >/dev/null 2>&1
-        pip install ./
+        python setup.py bdist_wheel
+        RESULT=$?
+        if [ ${RESULT} -eq 0 ]; then
+            cp -f ./dist/* ${DIST_DIR}
+            files=(`ls -1 dist/*.whl`)
+            for file_name in "${files[@]}"; do
+                echo ${file_name}
+                pip install --no-cache ${file_name}
+                RESULT=$?
+                if [ ${RESULT} -ne 0 ]; then
+                    break
+                fi
+            done
+        fi
     popd >/dev/null 2>&1
 popd >/dev/null 2>&1
 

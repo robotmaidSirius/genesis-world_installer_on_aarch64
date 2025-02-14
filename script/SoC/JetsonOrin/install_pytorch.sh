@@ -1,5 +1,5 @@
 #!/bin/bash
-## TODO: インストールできるか未検証
+## TODO: Installation is unverified
 # Reference:
 ## https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html
 ## https://forums.developer.nvidia.com/t/pytorch-for-jetson/72048
@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
         shift
         INSTALL_ROOT=$1
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 CURRENT_VER=$(pip show torch | grep Version)

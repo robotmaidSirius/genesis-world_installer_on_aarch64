@@ -1,4 +1,5 @@
 #!/bin/bash
+## BUILD TYPE: make
 INSTALL_VER=v2022.0.0
 INSTALL_ROOT=~/genesis
 
@@ -25,11 +26,11 @@ while [[ $# -gt 0 ]]; do
             INSTALL_ROOT=$1
         fi
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 if [ "" == "${INSTALL_VER}" ];then
-    echo "[WARNING] Since no version was specified, the installation was skipped."
+    echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
 fi
 CURRENT_VER=$(pkg-config --modversion tbb)

@@ -1,5 +1,5 @@
 #!/bin/bash
-## TODO: インストールできるか未検証
+## TODO: Installation is unverified
 INSTALL_VER=12.1
 INSTALL_ROOT=~/genesis
 
@@ -22,7 +22,7 @@ while [[ $# -gt 0 ]]; do
         shift
         INSTALL_ROOT=$1
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 # ========================================
