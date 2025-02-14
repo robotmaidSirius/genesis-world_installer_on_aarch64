@@ -76,6 +76,8 @@ else
   # TODO: Generate default if config.json does not exist?
   exit 0
 fi
+mkdir -p ${DIST_DIR}
+
 
 ## Install via apt
 if [ ${SKIP_APT} -ne 1 ]; then
