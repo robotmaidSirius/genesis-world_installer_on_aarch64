@@ -1,4 +1,5 @@
 #!/bin/bash
+RESULT=0
 
 echo ========================================
 echo "* cmake Usage         : $(cmake --version | head -n 1) "
@@ -16,7 +17,7 @@ lsb_release -a
 #cat /etc/os-release
 
 echo ========================================
-jetson_release
+jetson_release | sed 's/\x1B\[[0-9;]*m//g'
 # apt show nvidia-jetpack
 
 echo ========================================
@@ -51,10 +52,20 @@ echo "* screeninfo Usage    : $(pip show screeninfo | grep Version)"
 echo "* six Usage           : $(pip show six | grep Version)"
 
 echo ========================================
-echo "* pytorch Usage       : $(python -c "import torch;print(torch.__version__);")"
-echo "    cuDNN version     : $(python -c "import torch;print(torch.backends.cudnn.version());")"
-echo "    CUDA available    : $(python -c "import torch;print(torch.cuda.is_available());")"
-echo "    torchvision Usage : $(python -c "import torchvision;print(torchvision.__version__);")"
-echo "    torchaudio Usage  : $(python -c "import torchaudio;print(torchaudio.__version__);")"
+PRINT_TEXT=$(python -c "import torch;print(torch.__version__);")
+RESULT=$?
+if [[ ${RESULT} -eq 0 ]];then
+    echo "* pytorch Usage       : ${PRINT_TEXT}"
+    echo "    CUDA version      : $(python -c "import torch;print(torch.version.cuda);")"
+    echo "    cuDNN version     : $(python -c "import torch;print(torch.backends.cudnn.version());")"
+    echo "    CUDA available    : $(python -c "import torch;print(torch.cuda.is_available());")"
+    echo "    torchvision Usage : $(python -c "import torchvision;print(torchvision.__version__);")"
+    echo "    torchaudio Usage  : $(python -c "import torchaudio;print(torchaudio.__version__);")"
+else
+    echo "* pytorch Usage       : NOT installed"
+    echo "[ERROR] pytorch is not installed." >&2
+fi
 echo "* OpenCV Usage        : $(python -c "import cv2;print(cv2.__version__);")"
 #echo "* tensorflow Usage    : $(python -c "import tensorflow;print(tensorflow.__version__);")"
+
+exit ${RESULT}

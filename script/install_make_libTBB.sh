@@ -1,5 +1,6 @@
 #!/bin/bash
-INSTALL_VER=1.0.5
+## BUILD TYPE: make
+INSTALL_VER=v2022.0.0
 INSTALL_ROOT=~/genesis
 
 while [[ $# -gt 0 ]]; do
@@ -25,21 +26,21 @@ while [[ $# -gt 0 ]]; do
             INSTALL_ROOT=$1
         fi
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 if [ "" == "${INSTALL_VER}" ];then
-    echo "[WARNING] Since no version was specified, the installation was skipped."
+    echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
 fi
-CURRENT_VER=$(pip show coacd | grep Version)
+CURRENT_VER=$(pkg-config --modversion tbb)
 if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
-    echo "[SKIP] CoACD ${CURRENT_VER} is already installed"
+    echo "[SKIP] oneTBB ${CURRENT_VER} is already installed"
     exit 0
 fi
 
-INSTALL_URL=https://github.com/SarahWeiii/CoACD.git
-INSTALL_DIR=${INSTALL_ROOT}/CoACD
+INSTALL_URL=https://github.com/oneapi-src/oneTBB.git
+INSTALL_DIR=${INSTALL_ROOT}/oneTBB
 RESULT=0
 # ========================================
 
@@ -50,21 +51,20 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
     fi
 
     pushd "${INSTALL_DIR}" >/dev/null 2>&1
-        #git checkout ${INSTALL_VER}
-        #mkdir -p ${INSTALL_DIR}/build
-        #pushd "${INSTALL_DIR}/build" >/dev/null 2>&1
-        #    cmake .. -DCMAKE_BUILD_TYPE=Release
-        #    RESULT=$?
-        #    if [ ${RESULT} -eq 0 ]; then
-        #        make main -j $(nproc)
-        #        RESULT=$?
-        #    fi
-        #    #if [ ${RESULT} -eq 0 ]; then
-        #    #    sudo make main install
-        #    #    RESULT=$?
-        #    #fi
-        #popd >/dev/null 2>&1
-        pip install ./
+        git checkout ${INSTALL_VER}
+        mkdir -p ${INSTALL_DIR}/build
+        pushd "${INSTALL_DIR}/build" >/dev/null 2>&1
+            cmake .. -DCMAKE_BUILD_TYPE=Release
+            RESULT=$?
+            if [ ${RESULT} -eq 0 ]; then
+                make -j $(nproc)
+                RESULT=$?
+            fi
+            if [ ${RESULT} -eq 0 ]; then
+                sudo make install
+                RESULT=$?
+            fi
+        popd >/dev/null 2>&1
     popd >/dev/null 2>&1
 popd >/dev/null 2>&1
 

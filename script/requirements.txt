@@ -12,3 +12,5 @@ markdown-it-py
 colorama
 mdurl
 matplotlib
+ninja
+cython

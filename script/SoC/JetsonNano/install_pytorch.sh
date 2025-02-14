@@ -39,7 +39,7 @@ while [[ $# -gt 0 ]]; do
         shift
         INSTALL_ROOT=$1
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 # ========================================

@@ -1,9 +1,18 @@
 {
+    "reinstall": false,
     "install_path": "${HOME}/genesis",
     "venv_name": "venv_genesis",
-    "skip_apt": false,
-    "skip_pip": false,
+    "soc": "jetpack5",
+    "pyenv": {
+        "install": true,
+        "path": "${HOME}/.pyenv",
+        "write_bashrc": false
+    },
     "packages": {
+        "skip": {
+            "apt": false,
+            "pip": false
+        },
         "version": {
             "python": "3.11.11",
             "cmake": "3.31.5",
@@ -15,6 +24,18 @@
             "PyMeshLab": "v2023.12.post2",
             "tetgen": "v0.6.4",
             "genesis": "v0.2.1"
+        }
+    },
+    "hardware": {
+        "jetpack5": {
+            "pytorch": "v2.1.2",
+            "torchvision": "v0.16.2",
+            "torchaudio": "v2.1.2"
+        },
+        "jetpack6": {
+            "pytorch": "v2.3.1",
+            "torchvision": "v0.18.1",
+            "torchaudio": "v2.3.1"
         }
     }
 }

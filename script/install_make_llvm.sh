@@ -1,4 +1,5 @@
 #!/bin/bash
+## BUILD TYPE: make
 INSTALL_VER=15.0.5
 INSTALL_ROOT=~/genesis
 INSTALL_TYPE_TAR=0
@@ -29,11 +30,11 @@ while [[ $# -gt 0 ]]; do
             INSTALL_ROOT=$1
         fi
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 if [ "" == "${INSTALL_VER}" ];then
-    echo "[WARNING] Since no version was specified, the installation was skipped."
+    echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
 fi
 CURRENT_VER=$(clang --version | grep version)
@@ -70,14 +71,14 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
     mkdir -p ${INSTALL_DIR}/llvm/build
     pushd "${INSTALL_DIR}/llvm/build" >/dev/null 2>&1
         # BUILD LLVM
-        cmake .. -DBUILD_SHARED_LIBS:BOOL=OFF \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DLLVM_TARGETS_TO_BUILD='AArch64;ARM;NVPTX' \
-                -DLLVM_ENABLE_ASSERTIONS=ON \
-                -DLLVM_ENABLE_RTTI=ON \
-                -DLLVM_ENABLE_TERMINFO=OFF \
-                -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;lld;lldb;' \
-                -DCMAKE_INSTALL_PREFIX='/usr/local'
+        cmake .. -D BUILD_SHARED_LIBS:BOOL=OFF \
+                -D CMAKE_BUILD_TYPE=Release \
+                -D LLVM_TARGETS_TO_BUILD='AArch64;ARM;NVPTX' \
+                -D LLVM_ENABLE_ASSERTIONS=ON \
+                -D LLVM_ENABLE_RTTI=ON \
+                -D LLVM_ENABLE_TERMINFO=OFF \
+                -D LLVM_ENABLE_PROJECTS='clang;clang-tools-extra;lld;lldb;' \
+                -D CMAKE_INSTALL_PREFIX='/usr/local'
         RESULT=$?
 
         if [ ${RESULT} -eq 0 ]; then
@@ -94,12 +95,11 @@ popd >/dev/null 2>&1
 if [ ${RESULT} -eq 0 ]; then
     # Check your LLVM installation
     ## You should get 15.0.5
-    llvm-config --version
+    echo "llvm-config: "$(llvm-config --version)
     clang --version
-    clang++ --version
-
-    # ビルドターゲットを確認する
     clang --print-targets
+    #clang++ --version
+    #clang++ --print-targets
 fi
 
 exit ${RESULT}

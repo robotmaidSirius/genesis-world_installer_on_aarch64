@@ -1,6 +1,6 @@
 #!/bin/bash
 ## BUILD TYPE: python bdist_wheel
-INSTALL_VER=v0.16.2
+INSTALL_VER=v2023.12.post2
 INSTALL_ROOT=~/genesis
 DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/dist
 FORCE_REINSTALL=0
@@ -51,23 +51,16 @@ if [ "" == "${INSTALL_VER}" ];then
     exit 0
 fi
 if [[ ${FORCE_REINSTALL} -ne 1 ]]; then
-    CURRENT_VER=$(pip show vision | grep Version)
+    CURRENT_VER=$(pip show pymeshlab | grep Version)
     if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
-        echo "[SKIP] torchvision ${CURRENT_VER} is already installed"
+        echo "[SKIP] PyMeshLab ${CURRENT_VER} is already installed"
         exit 0
     fi
 fi
 
-INSTALL_URL=https://github.com/pytorch/vision
-INSTALL_DIR=${INSTALL_ROOT}/torchvision
+INSTALL_URL=https://github.com/cnr-isti-vclab/PyMeshLab.git
+INSTALL_DIR=${INSTALL_ROOT}/PyMeshLab
 RESULT=0
-# ========================================
-#sudo apt-get install libjpeg-dev zlib1g-dev libpython3-dev libopenblas-dev libavcodec-dev libavformat-dev libswscale-dev
-# ========================================
-export USE_CUDA=1
-export BUILD_SOX=1
-export BUILD_RNNT=1
-export USE_FFMPEG=1
 # ========================================
 
 mkdir -p ${INSTALL_ROOT}

@@ -21,3 +21,7 @@ libxcb-ewmh2
 libjemalloc-dev
 python3-openvdb
 libzstd-dev
+libopenblas-dev
+libopenmpi-dev
+python3-venv
+cython

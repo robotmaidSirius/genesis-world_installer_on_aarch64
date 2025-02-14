@@ -1,5 +1,6 @@
 #!/bin/bash
-## TODO: --tar オプションが未検証
+## BUILD TYPE: make
+## TODO: --tar option is unverified
 INSTALL_VER=3.31.5
 INSTALL_ROOT=~/genesis
 INSTALL_TYPE_TAR=0
@@ -30,11 +31,11 @@ while [[ $# -gt 0 ]]; do
             INSTALL_ROOT=$1
         fi
         shift;;
-    *) echo "Unknown parameter passed: $1"; shift;;
+    *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
 if [ "" == "${INSTALL_VER}" ];then
-    echo "[WARNING] Since no version was specified, the installation was skipped."
+    echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
 fi
 CURRENT_VER=$(cmake --version | grep version)
@@ -79,7 +80,7 @@ else
     # Update and check the package information
     sudo apt update -y
 
-    # インストールとバージョン確認
+    # Install cmake
     sudo apt install -y cmake
     RESULT=$?
 fi
