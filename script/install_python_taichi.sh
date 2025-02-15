@@ -5,7 +5,7 @@ INSTALL_VER=v1.7.3
 INSTALL_ROOT=~/genesis
 INSTALL_APPLY_PATCH=0
 DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/dist
-SCRIPT_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/script
+SCRIPT_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)
 FORCE_REINSTALL=0
 
 while [[ $# -gt 0 ]]; do
