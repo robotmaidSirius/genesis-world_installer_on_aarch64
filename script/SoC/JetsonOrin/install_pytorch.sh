@@ -6,11 +6,12 @@
 ## https://forums.developer.nvidia.com/t/pytorch-for-jetson/72048
 ### 'Build from Source'
 
-INSTALL_VER=v2.1.0
+INSTALL_VER=v2.1.2
 INSTALL_NVP_MODEL=0
 INSTALL_ROOT=~/genesis
 DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/dist
 FORCE_REINSTALL=0
+INSTALL_CUSPARSELT_VERSION=0.7.0.0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -36,6 +37,13 @@ while [[ $# -gt 0 ]]; do
     -v|--ver)
         shift
         INSTALL_VER=$1
+        shift;;
+    -vc=*|--cusparselt-ver=*)
+        INSTALL_CUSPARSELT_VERSION=${1#*=}
+        shift;;
+    -vc|--cusparselt-ver)
+        shift
+        INSTALL_CUSPARSELT_VERSION=$1
         shift;;
     -p=*|--root=*)
         if [ "" != "${1#*=}" ];then
@@ -66,6 +74,10 @@ if [ "" == "${INSTALL_VER}" ];then
     echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
 fi
+if [ "" == "${INSTALL_CUSPARSELT_VERSION}" ];then
+    echo "[WARNING] Since no version was specified, the installation was skipped." >&2
+    exit 0
+fi
 if [[ ${FORCE_REINSTALL} -ne 1 ]]; then
     CURRENT_VER=$(pip show torch | grep Version)
     if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
@@ -82,8 +94,6 @@ RESULT=0
 # ========================================
 export USE_NCCL=0
 export USE_ROCM=OFF
-export USE_MKL=OFF
-export USE_MKLDNN=OFF
 export USE_OPENCV=ON
 # skip setting this if you want to enable OpenMPI backend
 export USE_DISTRIBUTED=0
@@ -95,9 +105,32 @@ export PYTORCH_BUILD_VERSION=${INSTALL_VER#v}
 export PYTORCH_BUILD_NUMBER=1
 export _GLIBCXX_USE_CXX11_ABI=1
 # ========================================
+function copy_cuSPARSELt() {
+    # cuSPARSELt license: https://docs.nvidia.com/cuda/cusparselt/license.html
+    local INSTALL_CUSPARSELT_VERSION=${1:-0.7.0.0}
+    local INSTALL_CUSPARSELT_TARGET_DIR=tmp_cusparselt
+    local ARCH_PATH=${TARGET_ARCH:-$(uname -m)}
+    local CUSPARSELT_NAME="libcusparse_lt-linux-${ARCH_PATH}-${INSTALL_CUSPARSELT_VERSION}-archive"
+
+    rm -rf ${INSTALL_CUSPARSELT_TARGET_DIR}
+    mkdir -p ${INSTALL_CUSPARSELT_TARGET_DIR}
+    pushd "${INSTALL_CUSPARSELT_TARGET_DIR}" >/dev/null 2>&1
+
+        curl --retry 3 -OLs https://developer.download.nvidia.com/compute/cusparselt/redist/libcusparse_lt/linux-${ARCH_PATH}/${CUSPARSELT_NAME}.tar.xz
+        tar xf ${CUSPARSELT_NAME}.tar.xz
+        echo ${CUSPARSELT_NAME}
+        sudo cp -a ${CUSPARSELT_NAME}/include/* /usr/local/cuda/include/
+        sudo cp -a ${CUSPARSELT_NAME}/lib/* /usr/local/cuda/lib64/
+        echo "Installed cuSPARSELt: ${CUSPARSELT_NAME}"
+
+    popd >/dev/null 2>&1
+    rm -rf ${INSTALL_CUSPARSELT_TARGET_DIR}
+    sudo ldconfig
+}
 
 mkdir -p ${INSTALL_ROOT}
 pushd "${INSTALL_ROOT}" >/dev/null 2>&1
+    copy_cuSPARSELt
     # ========================================
     # Change jetson_clocks and nvpmodel
     # ========================================
@@ -127,13 +160,12 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
         # Patch
         # ========================================
         sed -i 's/CUSPARSE_COMPUTE_TF32/CUSPARSE_COMPUTE_32F/g' aten/src/ATen/native/sparse/cuda/cuSPARSELtOps.cpp
+        sed -i "s/raise ValueError('unknown license')/return('unknown license')/g" third_party/build_bundled.py
         pip install -r requirements.txt
-        #pip install mkl-static mkl-include
         # ========================================
         # Build PyTorch
         # ========================================
         python setup.py bdist_wheel
-        # pip install .
         RESULT=$?
         if [ ${RESULT} -eq 0 ]; then
             mkdir -p ${DIST_DIR}

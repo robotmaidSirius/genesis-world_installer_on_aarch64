@@ -155,16 +155,14 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
                 sudo make install
                 RESULT=$?
             fi
-            if [ ${RESULT} -eq 0 ]; then
-                #OpenCV_4.2.0
+            #if [ ${RESULT} -eq 0 ]; then
                 #echo 'export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-                    #echo 'export PYTHONPATH=/usr/local/lib/python3.8/site-packages/:$PYTHONPATH' >> ~/.bashrc
-
+                #echo 'export PYTHONPATH=/usr/local/lib/python3.8/site-packages/:$PYTHONPATH' >> ~/.bashrc
                 #export PKG_CONFIG_PATH=/home/jetson/opencv4/lib/pkgconfig
                 #export LD_LIBRARY_PATH=/home/jetson/opencv4/lib
                 #export OpenCV_CONFIG_PATH=/home/jetson/opencv4/lib/pkgconfig
-                echo "export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"
-            fi
+                #echo "export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"
+            #fi
             if [ ${RESULT} -eq 0 ]; then
                 sudo ldconfig
             fi

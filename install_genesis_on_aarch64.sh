@@ -37,11 +37,23 @@ while [[ $# -gt 0 ]]; do
     *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
-CONFIG_FILE=$(readlink -f ${CONFIG_FILE})
+
 # ========================================
+CONFIG_FILE=$(readlink -f ${CONFIG_FILE})
+if [ ! -f "${CONFIG_FILE}" ]; then
+  RESULT=1
+  echo "[ERROR] config.json does not exist" >&2
+  # TODO: Generate default if config.json does not exist?
+  exit 0
+fi
+JSON_DATA=$(cat ${CONFIG_FILE} | jq -c .)
+if [[ "" == "${JSON_DATA}" ]]; then
+  RESULT=1
+  echo "[ERROR] config.json is not a valid JSON file" >&2
+fi
 function get_jq_value() {
   local key=${1}
-  local value=$(eval echo $(jq -r '.'${key} ${CONFIG_FILE}));
+  local value=$(eval echo $(echo ${JSON_DATA} | jq -r '.'${key}));
   if [ "null" == "${value}" ];then
     value=""
   fi
@@ -49,7 +61,7 @@ function get_jq_value() {
 }
 function flag_jq_value() {
   local key=${1}
-  local value=$(eval echo $(jq -r '.'${key} ${CONFIG_FILE}));
+  local value=$(eval echo $(echo ${JSON_DATA} | jq -r '.'${key}));
   if [ true == "${value}" ];then
     value=1
   else
@@ -63,25 +75,17 @@ sudo apt-get install -y jq
 
 # TODO: Confirm custom installation?
 
-# Get environment settings
-if [ -f "${CONFIG_FILE}" ]; then
-  # Get packages to install from config.json
-  INSTALL_ROOT=$(eval echo $(get_jq_value 'install_path'));
-  PYTHON_VERSION=$(get_jq_value "packages.version.python");
-  ENV_NAME=$(get_jq_value "venv_name");
-  SKIP_APT=$(flag_jq_value "packages.skip.apt");
-  SKIP_PIP=$(flag_jq_value "packages.skip.pip");
-  INSTALL_PYENV=$(flag_jq_value "pyenv.install");
+# Get packages to install from config.json
+INSTALL_ROOT=$(eval echo $(get_jq_value 'install_path'));
+PYTHON_VERSION=$(get_jq_value "packages.version.python");
+ENV_NAME=$(get_jq_value "venv_name");
+SKIP_APT=$(flag_jq_value "packages.skip.apt");
+SKIP_PIP=$(flag_jq_value "packages.skip.pip");
+INSTALL_PYENV=$(flag_jq_value "pyenv.install");
 
-  ARGUMENTS=""
-  if [ 1 == $(flag_jq_value "reinstall") ];then
-    ARGUMENTS="--force-reinstall"
-  fi
-else
-  RESULT=1
-  echo "config.json does not exist"
-  # TODO: Generate default if config.json does not exist?
-  exit 0
+ARGUMENTS=""
+if [ 1 == $(flag_jq_value "reinstall") ];then
+  ARGUMENTS="--force-reinstall"
 fi
 mkdir -p ${DIST_DIR}
 
