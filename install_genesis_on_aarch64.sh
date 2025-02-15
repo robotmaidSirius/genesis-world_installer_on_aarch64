@@ -2,6 +2,7 @@
 SCRIPT_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/script
 CONFIG_FILE=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/config.json
 DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/dist
+FLAG_KEEP_GOING=0
 RESULT=0
 export MAX_JOBS=$((`nproc` - 1))
 if [[ ${MAX_JOBS} -le 0 ]]; then
@@ -13,6 +14,9 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
         echo "Usage: $0 -j|--jobs [jobs] -f|--config [config.json]"
         exit 0;;
+    --continue_on_error)
+        FLAG_KEEP_GOING=1
+        shift;;
     -j=*)
         MAX_JOBS=${1#*=}
         shift;;
@@ -86,7 +90,9 @@ if [ ${SKIP_APT} -ne 1 ]; then
   RESULT=$?
   if [ ${RESULT} -ne 0 ]; then
     echo "[ERROR] Install 'apt requirements_apt.txt' failed" >&2
-    exit 0
+    if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+      exit 0
+    fi
   fi
 fi
 
@@ -110,7 +116,9 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'pyenv' failed" >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
   fi
 
@@ -126,7 +134,9 @@ if [ ${RESULT} -eq 0 ]; then
     echo "* Version file       : $(pyenv version-file)"
     if [ ! -e ${ENV_NAME}/bin/activate ]; then
       echo "[ERROR] 'activate' script not found" >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
   fi
     ## ========================================
@@ -139,7 +149,9 @@ if [ ${RESULT} -eq 0 ]; then
       RESULT=$?
       if [ ${RESULT} -ne 0 ]; then
         echo "[ERROR] Install 'pip requirements.txt' failed" >&2
-        exit 0
+        if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+          exit 0
+        fi
       fi
     fi
 
@@ -150,7 +162,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'cmake' failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
     ## Install: LLVM
     echo -e "\n==============\n# Install: LLVM\n=============="
@@ -158,7 +172,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'LLVM' failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
     ## Install: CoACD
     echo -e "\n==============\n# Install: CoACD\n=============="
@@ -166,7 +182,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'install_CoACD' failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
     ## Install: VTK
     echo -e "\n==============\n# Install: VTK\n=============="
@@ -174,7 +192,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'VTK' failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
 
     ## ========================================
@@ -184,7 +204,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'taichi' failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
     ## Install: libigl
     echo -e "\n==============\n# Install: libigl\n=============="
@@ -192,7 +214,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'libigl' failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
     ## Install: PyMeshLab
     echo -e "\n==============\n# Install: PyMeshLab\n=============="
@@ -200,7 +224,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'PyMeshLab' failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
     ## Install: tetgen
     echo -e "\n==============\n# Install: tetgen\n=============="
@@ -208,7 +234,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'tetgen' failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
 
     ## Install: genesis-world
@@ -217,7 +245,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'genesis' failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
 
     ## ========================================
@@ -227,7 +257,9 @@ if [ ${RESULT} -eq 0 ]; then
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Create script failed." >&2
-      exit 0
+      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+        exit 0
+      fi
     fi
 
   popd >/dev/null 2>&1
@@ -235,7 +267,7 @@ if [ ${RESULT} -eq 0 ]; then
   ## Display version information
   pushd "${DIST_DIR}" >/dev/null 2>&1
     bash ${SCRIPT_DIR}/print_ver.sh > ${DIST_DIR}/build_info.log
-    md5sum *.whl *.log > ${DIST_DIR}/md5.txt
+    md5sum *.whl *.log > ${DIST_DIR}/md5
   popd >/dev/null 2>&1
 
   if [ "" != ${ENV_NAME} ];then
