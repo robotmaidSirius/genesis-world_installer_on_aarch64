@@ -59,7 +59,7 @@ function flag_jq_value() {
 }
 # ========================================
 echo -e "####################\n $0\n####################"
-sudo apt-get install -y jq fzf
+sudo apt-get install -y jq
 
 # TODO: Confirm custom installation?
 
@@ -84,7 +84,6 @@ else
   exit 0
 fi
 mkdir -p ${DIST_DIR}
-
 
 ## Install via apt
 if [ ${SKIP_APT} -ne 1 ]; then
@@ -277,5 +276,5 @@ if [ ${RESULT} -eq 0 ]; then
     deactivate
   fi
 
-  echo Install path : ${INSTALL_ROOT}
+  echo -e "\n==============\n# Finished\n    Install path : ${INSTALL_ROOT}\n=============="
 fi

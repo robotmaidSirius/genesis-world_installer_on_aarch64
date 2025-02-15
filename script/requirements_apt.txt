@@ -1,5 +1,4 @@
 jq
-fzf
 build-essential
 ninja-build
 libvulkan-dev
