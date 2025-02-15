@@ -12,7 +12,10 @@ fi
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
-        echo "Usage: $0 -j|--jobs [jobs] -f|--config [config.json]"
+        echo "Usage: $0 [-f|--config CONFIG_FILE] [-j|--jobs MAX_JOBS] [--continue_on_error]"
+        echo "  -f, --config CONFIG_FILE : Specify the configuration file"
+        echo "  -j, --jobs MAX_JOBS      : Specify the maximum number of jobs"
+        echo "  --continue_on_error      : Continue to the next process even if an error occurs"
         exit 0;;
     --continue_on_error)
         FLAG_KEEP_GOING=1

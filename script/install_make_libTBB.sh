@@ -6,7 +6,9 @@ INSTALL_ROOT=~/genesis
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
-        echo "Usage: $0 -v|--ver [version] -p|--root [path]"
+        echo "Usage: $0 [-v|--ver VERSION] [-p|--root INSTALL_ROOT]"
+        echo "  -v, --ver VERSION       : Specify the version to install"
+        echo "  -p, --root INSTALL_ROOT : Specify the root directory to install"
         exit 0;;
     -v=*|--ver=*)
         INSTALL_VER=${1#*=}

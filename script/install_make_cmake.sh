@@ -8,7 +8,10 @@ INSTALL_TYPE_TAR=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
-        echo "Usage: $0 -v|--ver [version] -p|--root [path] --tar"
+        echo "Usage: $0 [-v|--ver VERSION] [-p|--root INSTALL_ROOT] [--tar]"
+        echo "  -v, --ver VERSION       : Specify the version to install"
+        echo "  -p, --root INSTALL_ROOT : Specify the root directory to install"
+        echo "  --tar                   : Use tarball to install"
         exit 0;;
     --tar)
         INSTALL_TYPE_TAR=1
