@@ -53,7 +53,7 @@ if [[ "" == "${JSON_DATA}" ]]; then
 fi
 function get_jq_value() {
   local key=${1}
-  local value=$(eval echo $(echo ${JSON_DATA} | jq -r '.'${key}));
+  local value=$(eval echo $(jq -r '.'${key} <<< "${JSON_DATA}"));
   if [ "null" == "${value}" ];then
     value=""
   fi
@@ -61,7 +61,7 @@ function get_jq_value() {
 }
 function flag_jq_value() {
   local key=${1}
-  local value=$(eval echo $(echo ${JSON_DATA} | jq -r '.'${key}));
+  local value=$(eval echo $(jq -r '.'${key} <<< "${JSON_DATA}"));
   if [ true == "${value}" ];then
     value=1
   else
@@ -106,52 +106,83 @@ if [ ${RESULT} -eq 0 ]; then
   mkdir -p ${INSTALL_ROOT}
   # Set environment variables
   pushd "${INSTALL_ROOT}" >/dev/null 2>&1
-  # pyenv settings
-  export PYENV_ROOT=$(eval echo $(get_jq_value "pyenv.path"))
-  export PATH="${PYENV_ROOT}/bin:$PATH"
-  eval "$(pyenv init -)"
-  PYENV_VERSION=$(pyenv --version)
-  if [ "" == "${PYENV_VERSION}" ]; then
-    if [ ${INSTALL_PYENV} -eq 1 ]; then
-      ## Install pyenv
-      echo -e "\n==============\n# Install: pyenv\n=============="
-      bash ${SCRIPT_DIR}/setup_pyenv.sh --python_version=$(get_jq_value "packages.version.python") -p=${PYENV_ROOT}
-      RESULT=$?
-    else
-      RESULT=1
+    # pyenv settings
+    export PYENV_ROOT=$(eval echo $(get_jq_value "pyenv.path"))
+    export PATH="${PYENV_ROOT}/bin:$PATH"
+    eval "$(pyenv init -)"
+    PYENV_VERSION=$(pyenv --version)
+    if [ "" == "${PYENV_VERSION}" ]; then
+      if [ ${INSTALL_PYENV} -eq 1 ]; then
+        ## Install pyenv
+        echo -e "\n==============\n# Install: pyenv\n=============="
+        bash ${SCRIPT_DIR}/setup_pyenv.sh --python_version=$(get_jq_value "packages.version.python") -p=${PYENV_ROOT}
+        RESULT=$?
+      else
+        RESULT=1
+      fi
+      if [ ${RESULT} -ne 0 ]; then
+        echo "[ERROR] Install 'pyenv' failed" >&2
+        if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+          exit 0
+        fi
+      fi
+    fi
+
+    echo -e "\n==============\n# pyenv: Version changes ${PYTHON_VERSION}\n=============="
+    pyenv local ${PYTHON_VERSION}
+    RESULT=$?
+    if [ ${RESULT} -eq 0 ]; then
+      if [ "${PYTHON_VERSION}" != "$(pyenv version-name)" ]; then
+        RESULT=1
+      fi
     fi
     if [ ${RESULT} -ne 0 ]; then
-      echo "[ERROR] Install 'pyenv' failed" >&2
-      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
-        exit 0
+      if [ -d "${ENV_NAME}" ]; then
+        rm -rf ${ENV_NAME}
       fi
+      ## Install python
+      echo -e "\n==============\n# Install: pyenv:${PYTHON_VERSION}\n=============="
+      pyenv install --skip-existing ${PYTHON_VERSION}
+      RESULT=$?
+      if [ ${RESULT} -ne 0 ]; then
+        echo "[ERROR] Install 'python ${PYTHON_VERSION}' failed" >&2
+        if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+          exit 0
+        fi
+      fi
+      pyenv local ${PYTHON_VERSION}
     fi
-  fi
 
-  pyenv local ${PYTHON_VERSION}
-  if [ "" != ${ENV_NAME} ];then
-    echo -e "\n==============\n# Set venv: ${ENV_NAME}\n=============="
-    if [ ! -d "${ENV_NAME}" ]; then
-      python -m venv ${ENV_NAME}
-    fi
-    source ${ENV_NAME}/bin/activate
-    echo "* Virtual environment: ${VIRTUAL_ENV_PROMPT}"
-    echo "* Shims version      : $(pyenv version-name)"
-    echo "* Version file       : $(pyenv version-file)"
-    if [ ! -e ${ENV_NAME}/bin/activate ]; then
-      echo "[ERROR] 'activate' script not found" >&2
-      if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+    if [ "" != ${ENV_NAME} ];then
+      echo -e "\n==============\n# Set venv: ${ENV_NAME}\n=============="
+      if [ ! -d "${ENV_NAME}" ]; then
+        python -m venv ${ENV_NAME}
+      fi
+      source ${ENV_NAME}/bin/activate
+      echo "* Virtual environment: ${VIRTUAL_ENV_PROMPT}"
+      echo "* Shims version      : $(pyenv version-name)"
+      echo "* Version file       : $(pyenv version-file)"
+      if [ ! -e ${ENV_NAME}/bin/activate ]; then
+        echo "[ERROR] 'activate' script not found" >&2
+        if [[ ${FLAG_KEEP_GOING} -eq 0 ]]; then
+          exit 0
+        fi
+      fi
+      if [ $(pyenv version-name) != ${PYTHON_VERSION} ]; then
+        echo "[ERROR] 'python' version is not ${PYTHON_VERSION}" >&2
         exit 0
       fi
     fi
-  fi
+
     ## ========================================
     # Install via pip
+    echo -e "\n==============\n# pip install --upgrade pip\n=============="
+    echo "* Python version     : $(python --version)"
     python -m pip install --upgrade pip
     # Install pip requirements.txt
     if [ ${SKIP_PIP} -ne 1 ]; then
       echo -e "\n==============\n# pip requirements.txt\n=============="
-      pip install -r ${SCRIPT_DIR}/requirements.txt
+      pip install -U -r ${SCRIPT_DIR}/requirements.txt
       RESULT=$?
       if [ ${RESULT} -ne 0 ]; then
         echo "[ERROR] Install 'pip requirements.txt' failed" >&2

@@ -9,7 +9,7 @@ echo "* clang Usage         : $(clang --version | head -n 1)"
 echo "* clang++ Usage       : $(clang++ --version | head -n 1)"
 
 echo ========================================
-echo "* Memory Usage "
+echo "* Memory Usage"
 free -h | tail -n 2
 
 echo ========================================
@@ -23,6 +23,11 @@ if [ "" != "${PRINT_TEXT}" ];then
 fi
 # apt show nvidia-jetpack
 
+echo ========================================
+echo "* pyenv Usage: $(pyenv --version)"
+echo "    Virtual environment: ${VIRTUAL_ENV_PROMPT}"
+echo "    Shims version      : $(pyenv version-name)"
+echo "    Version file       : $(pyenv version-file)"
 echo ========================================
 echo "* python Usage        : $(python --version | head -n 1)"
 echo "* genesis-world Usage : $(pip show genesis-world | grep Version)"
