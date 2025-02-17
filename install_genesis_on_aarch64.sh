@@ -72,6 +72,7 @@ function flag_jq_value() {
 }
 # ========================================
 echo -e "####################\n $0\n####################"
+mkdir -p ${LOG_DIR}
 sudo apt-get install -y jq
 
 # TODO: Confirm custom installation?
@@ -83,6 +84,15 @@ ENV_NAME=$(get_jq_value "venv_name");
 SKIP_APT=$(flag_jq_value "packages.skip.apt");
 SKIP_PIP=$(flag_jq_value "packages.skip.pip");
 INSTALL_PYENV=$(flag_jq_value "pyenv.install");
+
+if [ "" == "${INSTALL_ROOT}" ]; then
+  echo "[ERROR] Please set 'install_path'" >&2;
+  exit 0
+fi
+if [ "" == "${PYTHON_VERSION}" ]; then
+  echo "[ERROR] Please set 'packages.version.python'" >&2;
+  exit 0
+fi
 
 ARGUMENTS=""
 if [ 1 == $(flag_jq_value "reinstall") ];then

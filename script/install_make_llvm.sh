@@ -74,6 +74,12 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
     mkdir -p ${INSTALL_DIR}/llvm/build
     pushd "${INSTALL_DIR}/llvm/build" >/dev/null 2>&1
         # BUILD LLVM
+        APPEND_ARGS='-D CMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+                -D CMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+                -D CMAKE_SYSTEM_NAME=Linux \
+                -D CMAKE_SYSTEM_PROCESSOR=aarch64 \
+                -D CMAKE_C_FLAGS="-march=armv8-a" \
+                -D CMAKE_CXX_FLAGS="-march=armv8-a"'
         cmake .. \
                 -D BUILD_SHARED_LIBS:BOOL=OFF \
                 -D CMAKE_BUILD_TYPE=Release \
@@ -83,12 +89,7 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
                 -D LLVM_ENABLE_TERMINFO=OFF \
                 -D LLVM_ENABLE_PROJECTS='clang;clang-tools-extra;lld;lldb;compiler-rt' \
                 -D CMAKE_INSTALL_PREFIX='/usr/local' \
-                -D CMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
-                -D CMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
-                -D CMAKE_SYSTEM_NAME=Linux \
-                -D CMAKE_SYSTEM_PROCESSOR=aarch64 \
-                -D CMAKE_C_FLAGS="-march=armv8-a" \
-                -D CMAKE_CXX_FLAGS="-march=armv8-a"
+                ${APPEND_ARGS}
 
         RESULT=$?
 
