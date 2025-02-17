@@ -62,9 +62,9 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
 pushd "${INSTALL_DIR}" >/dev/null 2>&1
     # Prerequisites and Installation
     ## Install system packages required by PyTorch
-    sudo apt -y update
-    sudo apt install -y python-pip libopenblas-dev
-    # sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev
+    sudo apt-get -y update
+    sudo apt-get install -y python-pip libopenblas-dev
+    # sudo apt-get install -y libopenblas-base libopenmpi-dev libomp-dev
 
     wget raw.githubusercontent.com/pytorch/pytorch/5c6af2b583709f6176898c017424dc9981023c28/.ci/docker/common/install_cusparselt.sh
     export CUDA_VERSION=${INSTALL_VER}

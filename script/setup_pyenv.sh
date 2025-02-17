@@ -67,7 +67,7 @@ if [ -d "${INSTALL_DIR}" ]; then
   exit 0
 fi
 
-sudo apt install -y \
+sudo apt-get install -y \
   libffi-dev libsqlite3-dev zlib1g-dev libbz2-dev libreadline-dev \
   libssl-dev libncursesw5-dev xz-utils tk-dev liblzma-dev \
   libgdbm-dev libnss3-dev

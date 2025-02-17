@@ -1,0 +1,65 @@
+name: Creating by tag generation
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    name: Template 'Release Note'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Read current version
+      id: current_version
+      run: |
+        echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+        echo "ARCHITECTURE=aarch64" >> $GITHUB_OUTPUT
+        echo "PYTHON_VERSION=3.11.11" >> $GITHUB_OUTPUT
+
+    - name: Create Release Note
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.current_version.outputs.TAG }}
+        release_name: "[${{ steps.current_version.outputs.TAG }}] genesis-world on aarch64"
+        draft: true
+        prerelease: false
+        body: |
+          | Item | Value |
+          | ---- | ----- |
+          | architecture | ${{ steps.current_version.outputs.ARCHITECTURE }}   |
+          | python       | ${{ steps.current_version.outputs.PYTHON_VERSION }} |
+
+          This package allows [Genesis](https://github.com/Genesis-Embodied-AI/Genesis) to be installed on aarch64.
+
+          # Installation Command
+
+          Install [pyenv](https://github.com/pyenv/pyenv) and ensure that **python ${{ steps.current_version.outputs.PYTHON_VERSION }}** is running.
+
+          ```bash
+          # Install Python on pyenv
+          pyenv install ${{ steps.current_version.outputs.PYTHON_VERSION }}
+          pyenv local ${{ steps.current_version.outputs.PYTHON_VERSION }}
+          # Change virtual environment
+          VIRTUAL_ENV_NAME=genesis_world
+          source ${VIRTUAL_ENV_NAME}/bin/activate
+
+          # URL of this release note
+          INDEX_URL=https://github.com/robotmaidSirius/genesis-world_installer_on_aarch64/releases/download/${{ steps.current_version.outputs.TAG }}
+
+          # Install dependencies for aarch64
+          pip install ${INDEX_URL}/coacd-1.0.5-cp311-abi3-linux_aarch64.whl
+          pip install ${INDEX_URL}/libigl-2.4.1-cp311-cp311-linux_aarch64.whl
+          pip install ${INDEX_URL}/pymeshlab-2023.12.post2-cp311-cp311-manylinux_2_31_aarch64.whl
+          pip install ${INDEX_URL}/taichi-1.7.3-cp311-cp311-linux_aarch64.whl
+          pip install ${INDEX_URL}/tetgen-0.6.4-cp311-cp311-linux_aarch64.whl
+          pip install ${INDEX_URL}/vtk-9.4.1.dev0-cp311-cp311-linux_aarch64.whl
+
+          # Install genesis_world after installing dependencies
+          pip install ${INDEX_URL}/genesis_world-0.2.1-cp311-cp311-linux_aarch64.whl
+          ```

@@ -51,27 +51,27 @@ RESULT=0
 # ========================================
 
 if [ ${INSTALL_WITH_APT} -eq 1 ]; then
-    sudo apt -y purge *libopencv*
+    sudo apt-get -y purge *libopencv*
     # sudo find / -name " *opencv* " -exec rm -i {} \;
-    sudo apt install -y build-essential git libgtk2.0-dev pkg-config libavcodec-dev cmake-curses-gui
-    sudo apt install -y libavformat-dev libswscale-dev
-    sudo apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-*
-    sudo apt install -y python2.7-dev python3.6-dev python-dev python-numpy python3-numpy
-    sudo apt install -y libtbb2 libtbb-dev libjpeg-dev libpng-dev libpng++-dev libtiff-dev libdc1394-22-dev
-    sudo apt install -y libv4l-dev v4l-utils qv4l2
-    #sudo apt install -y v4l2ucp
+    sudo apt-get install -y build-essential git libgtk2.0-dev pkg-config libavcodec-dev cmake-curses-gui
+    sudo apt-get install -y libavformat-dev libswscale-dev
+    sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-*
+    sudo apt-get install -y python2.7-dev python3.6-dev python-dev python-numpy python3-numpy
+    sudo apt-get install -y libtbb2 libtbb-dev libjpeg-dev libpng-dev libpng++-dev libtiff-dev libdc1394-22-dev
+    sudo apt-get install -y libv4l-dev v4l-utils qv4l2
+    #sudo apt-get install -y v4l2ucp
 
-    sudo apt install -y libhdf5-dev libhdf5-serial-dev gfortran libtesseract-dev libleptonica-dev libatlas-base-dev liblapacke-dev
-    sudo apt install -y libeigen3-dev libpng-dev libpng++-dev
-    #sudo apt install -y libjasper-dev libjpeg9-dev
-    sudo apt install -y libtiff5-dev libtiff-dev
-    sudo apt install -y ffmpeg
-    sudo apt install -y libavresample-dev
-    sudo apt install -y libvorbis-dev libxvidcore-dev libx264-dev libxvidcore-dev
-    sudo apt install -y libopencore-amrnb-dev libopencore-amrwb-dev
-    sudo apt install -y libxine2-dev
-    sudo apt install -y libgtk-3-dev libcanberra-gtk*
-    #sudo apt install -y libqtgui4 libqtwebkit4 libqt4-dev libqt4-test libqt4-dev libqt4-opengl-dev python3-pyqt5
+    sudo apt-get install -y libhdf5-dev libhdf5-serial-dev gfortran libtesseract-dev libleptonica-dev libatlas-base-dev liblapacke-dev
+    sudo apt-get install -y libeigen3-dev libpng-dev libpng++-dev
+    #sudo apt-get install -y libjasper-dev libjpeg9-dev
+    sudo apt-get install -y libtiff5-dev libtiff-dev
+    sudo apt-get install -y ffmpeg
+    sudo apt-get install -y libavresample-dev
+    sudo apt-get install -y libvorbis-dev libxvidcore-dev libx264-dev libxvidcore-dev
+    sudo apt-get install -y libopencore-amrnb-dev libopencore-amrwb-dev
+    sudo apt-get install -y libxine2-dev
+    sudo apt-get install -y libgtk-3-dev libcanberra-gtk*
+    #sudo apt-get install -y libqtgui4 libqtwebkit4 libqt4-dev libqt4-test libqt4-dev libqt4-opengl-dev python3-pyqt5
 fi
 
 # sudo ln -s /usr/lib/arm-linux-gnueabihf/libhdf5_serial.so /usr/lib/arm-linux-gnueabihf/libhdf5.so
@@ -155,16 +155,14 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
                 sudo make install
                 RESULT=$?
             fi
-            if [ ${RESULT} -eq 0 ]; then
-                #OpenCV_4.2.0
+            #if [ ${RESULT} -eq 0 ]; then
                 #echo 'export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-                    #echo 'export PYTHONPATH=/usr/local/lib/python3.8/site-packages/:$PYTHONPATH' >> ~/.bashrc
-
+                #echo 'export PYTHONPATH=/usr/local/lib/python3.8/site-packages/:$PYTHONPATH' >> ~/.bashrc
                 #export PKG_CONFIG_PATH=/home/jetson/opencv4/lib/pkgconfig
                 #export LD_LIBRARY_PATH=/home/jetson/opencv4/lib
                 #export OpenCV_CONFIG_PATH=/home/jetson/opencv4/lib/pkgconfig
-                echo "export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"
-            fi
+                #echo "export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"
+            #fi
             if [ ${RESULT} -eq 0 ]; then
                 sudo ldconfig
             fi

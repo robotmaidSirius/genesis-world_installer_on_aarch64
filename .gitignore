@@ -173,3 +173,5 @@ cython_debug/
 # my project
 ._*
 */._*
+log/
+dist/

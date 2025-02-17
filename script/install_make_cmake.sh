@@ -8,7 +8,10 @@ INSTALL_TYPE_TAR=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
-        echo "Usage: $0 -v|--ver [version] -p|--root [path] --tar"
+        echo "Usage: $0 [-v|--ver VERSION] [-p|--root INSTALL_ROOT] [--tar]"
+        echo "  -v, --ver VERSION       : Specify the version to install"
+        echo "  -p, --root INSTALL_ROOT : Specify the root directory to install"
+        echo "  --tar                   : Use tarball to install"
         exit 0;;
     --tar)
         INSTALL_TYPE_TAR=1
@@ -70,7 +73,7 @@ if [ ${INSTALL_TYPE_TAR} -eq 1 ]; then
         popd >/dev/null 2>&1
     popd >/dev/null 2>&1
 else
-    sudo apt install curl gnupg lsb-release
+    sudo apt-get install -y curl gnupg lsb-release
 
     # Add Kitware repository
     echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ '$(lsb_release -cs)' main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
@@ -78,10 +81,10 @@ else
     wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 
     # Update and check the package information
-    sudo apt update -y
+    sudo apt-get update -y
 
     # Install cmake
-    sudo apt install -y cmake
+    sudo apt-get install -y cmake
     RESULT=$?
 fi
 

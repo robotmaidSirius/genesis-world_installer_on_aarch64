@@ -14,3 +14,4 @@ mdurl
 matplotlib
 ninja
 cython
+pyyaml

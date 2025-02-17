@@ -5,18 +5,24 @@ INSTALL_VER=v1.7.3
 INSTALL_ROOT=~/genesis
 INSTALL_APPLY_PATCH=0
 DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/dist
+SCRIPT_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)
 FORCE_REINSTALL=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
-        echo "Usage: $0 -v|--ver [version] -p|--root [path]"
+        echo "Usage: $0 [-v|--ver VERSION] [-p|--root INSTALL_ROOT] [-d|--dist DIST_DIR] [--force-reinstall] [--apply_patch]"
+        echo "  -v, --ver VERSION       : Specify the version to install"
+        echo "  -p, --root INSTALL_ROOT : Specify the root directory to install"
+        echo "  -d, --dist DIST_DIR     : Specify the directory to store the wheel file"
+        echo "  --force-reinstall       : Force reinstallation"
+        echo "  --apply_patch           : Apply the patch to install on aarch64"
         exit 0;;
     --force-reinstall)
         echo "[MESS] force reinstall"
         FORCE_REINSTALL=1
         shift;;
-    -ap|--apply_patch)
+    --apply_patch)
         echo "[MESS] Apply patch"
         INSTALL_APPLY_PATCH=1
         shift;;
@@ -56,6 +62,7 @@ if [ "" == "${INSTALL_VER}" ];then
     echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
 fi
+python -m pip install --upgrade taichi==${INSTALL_VER#v}
 if [[ ${FORCE_REINSTALL} -ne 1 ]]; then
     CURRENT_VER=$(pip show taichi | grep Version)
     if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
@@ -92,6 +99,9 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
         RESULT=$?
         if [ ${RESULT} -eq 0 ]; then
             # ./build.py
+            if [ -e "requirements.txt" ]; then
+                pip install --no-cache -r requirements.txt
+            fi
             python setup.py bdist_wheel
             RESULT=$?
             if [ ${RESULT} -eq 0 ]; then

@@ -8,7 +8,9 @@ INSTALL_PYENV_DIR=${HOME}/.pyenv
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
-        echo "Usage: $0 -p|--root [path]"
+        echo "Usage: $0 [-n|--env_name ENV_NAME] [-p|--pyenv_dir PYENV_DIR]"
+        echo "  -n, --env_name  : Specify the name of the virtual environment"
+        echo "  -p, --pyenv_dir : Specify the directory where pyenv is installed"
         exit 0;;
     -n=*|--env_name=*)
         ENV_NAME=${1#*=}
