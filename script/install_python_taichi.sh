@@ -62,6 +62,7 @@ if [ "" == "${INSTALL_VER}" ];then
     echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
 fi
+python -m pip install --upgrade taichi==${INSTALL_VER#v}
 if [[ ${FORCE_REINSTALL} -ne 1 ]]; then
     CURRENT_VER=$(pip show taichi | grep Version)
     if [[ "${CURRENT_VER}" =~ "${INSTALL_VER#v}" ]]; then
@@ -98,6 +99,9 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
         RESULT=$?
         if [ ${RESULT} -eq 0 ]; then
             # ./build.py
+            if [ -e "requirements.txt" ]; then
+                pip install --no-cache -r requirements.txt
+            fi
             python setup.py bdist_wheel
             RESULT=$?
             if [ ${RESULT} -eq 0 ]; then

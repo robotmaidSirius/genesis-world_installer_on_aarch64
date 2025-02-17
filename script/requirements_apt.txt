@@ -24,3 +24,9 @@ libopenblas-dev
 libopenmpi-dev
 python3-venv
 cython
+gcc-aarch64-linux-gnu
+g++-aarch64-linux-gnu
+ninja-build
+gcc
+g++
+libatomic1

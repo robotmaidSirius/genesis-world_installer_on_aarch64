@@ -2,6 +2,7 @@
 SCRIPT_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/script
 CONFIG_FILE=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/config.json
 DIST_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/dist
+LOG_DIR=$(cd $(dirname $(realpath "${BASH_SOURCE:-0}")); pwd)/log
 FLAG_KEEP_GOING=0
 RESULT=0
 export MAX_JOBS=$((`nproc` - 1))
@@ -92,7 +93,7 @@ mkdir -p ${DIST_DIR}
 ## Install via apt
 if [ ${SKIP_APT} -ne 1 ]; then
   echo -e "\n==============\n# Install: apt\n=============="
-  bash ${SCRIPT_DIR}/install_apt.sh ${SCRIPT_DIR}/requirements_apt.txt --continue_on_error
+  bash ${SCRIPT_DIR}/install_apt.sh ${SCRIPT_DIR}/requirements_apt.txt --continue_on_error | tee ${LOG_DIR}/install_apt.log
   RESULT=$?
   if [ ${RESULT} -ne 0 ]; then
     echo "[ERROR] Install 'apt requirements_apt.txt' failed" >&2
@@ -115,7 +116,7 @@ if [ ${RESULT} -eq 0 ]; then
       if [ ${INSTALL_PYENV} -eq 1 ]; then
         ## Install pyenv
         echo -e "\n==============\n# Install: pyenv\n=============="
-        bash ${SCRIPT_DIR}/setup_pyenv.sh --python_version=$(get_jq_value "packages.version.python") -p=${PYENV_ROOT}
+        bash ${SCRIPT_DIR}/setup_pyenv.sh --python_version=$(get_jq_value "packages.version.python") -p=${PYENV_ROOT} | tee ${LOG_DIR}/install_pyenv.log
         RESULT=$?
       else
         RESULT=1
@@ -182,7 +183,7 @@ if [ ${RESULT} -eq 0 ]; then
     # Install pip requirements.txt
     if [ ${SKIP_PIP} -ne 1 ]; then
       echo -e "\n==============\n# pip requirements.txt\n=============="
-      pip install -U -r ${SCRIPT_DIR}/requirements.txt
+      pip install -U -r ${SCRIPT_DIR}/requirements.txt | tee ${LOG_DIR}/install_pip.log
       RESULT=$?
       if [ ${RESULT} -ne 0 ]; then
         echo "[ERROR] Install 'pip requirements.txt' failed" >&2
@@ -195,7 +196,7 @@ if [ ${RESULT} -eq 0 ]; then
     ## ========================================
     ## Install: cmake
     echo -e "\n==============\n# Install: cmake\n=============="
-    bash ${SCRIPT_DIR}/install_make_cmake.sh -v=$(get_jq_value "packages.version.cmake") -p=${INSTALL_ROOT}
+    bash ${SCRIPT_DIR}/install_make_cmake.sh -v=$(get_jq_value "packages.version.cmake") -p=${INSTALL_ROOT} | tee ${LOG_DIR}/install_cmake.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'cmake' failed." >&2
@@ -205,7 +206,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: LLVM
     echo -e "\n==============\n# Install: LLVM\n=============="
-    bash ${SCRIPT_DIR}/install_make_llvm.sh -v=$(get_jq_value "packages.version.llvm") -p=${INSTALL_ROOT} --tar
+    bash ${SCRIPT_DIR}/install_make_llvm.sh -v=$(get_jq_value "packages.version.llvm") -p=${INSTALL_ROOT} --tar | tee ${LOG_DIR}/install_llvm.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'LLVM' failed." >&2
@@ -213,9 +214,12 @@ if [ ${RESULT} -eq 0 ]; then
         exit 0
       fi
     fi
+    export CFLAGS="-march=armv8-a"
+    export CXXFLAGS="-march=armv8-a"
+
     ## Install: CoACD
     echo -e "\n==============\n# Install: CoACD\n=============="
-    bash ${SCRIPT_DIR}/install_python_CoACD.sh -v=$(get_jq_value "packages.version.CoACD") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS}
+    bash ${SCRIPT_DIR}/install_python_CoACD.sh -v=$(get_jq_value "packages.version.CoACD") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS} | tee ${LOG_DIR}/install_CoACD.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'install_CoACD' failed." >&2
@@ -225,7 +229,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: VTK
     echo -e "\n==============\n# Install: VTK\n=============="
-    bash ${SCRIPT_DIR}/install_cmake_python_vtk.sh -v=$(get_jq_value "packages.version.vtk") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS}
+    bash ${SCRIPT_DIR}/install_cmake_python_vtk.sh -v=$(get_jq_value "packages.version.vtk") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS} | tee ${LOG_DIR}/install_vtk.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'VTK' failed." >&2
@@ -237,7 +241,7 @@ if [ ${RESULT} -eq 0 ]; then
     ## ========================================
     ## Install: taichi
     echo -e "\n==============\n# Install: taichi\n=============="
-    bash ${SCRIPT_DIR}/install_python_taichi.sh -v=$(get_jq_value "packages.version.taichi") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS} --apply_patch
+    bash ${SCRIPT_DIR}/install_python_taichi.sh -v=$(get_jq_value "packages.version.taichi") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS} --apply_patch | tee ${LOG_DIR}/install_taichi.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'taichi' failed." >&2
@@ -247,7 +251,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: libigl
     echo -e "\n==============\n# Install: libigl\n=============="
-    bash ${SCRIPT_DIR}/install_python_libigl.sh -v=$(get_jq_value "packages.version.libigl") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS}
+    bash ${SCRIPT_DIR}/install_python_libigl.sh -v=$(get_jq_value "packages.version.libigl") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS} | tee ${LOG_DIR}/install_libigl.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'libigl' failed." >&2
@@ -257,7 +261,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: PyMeshLab
     echo -e "\n==============\n# Install: PyMeshLab\n=============="
-    bash ${SCRIPT_DIR}/install_python_PyMeshLab.sh -v=$(get_jq_value "packages.version.PyMeshLab") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS}
+    bash ${SCRIPT_DIR}/install_python_PyMeshLab.sh -v=$(get_jq_value "packages.version.PyMeshLab") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS} | tee ${LOG_DIR}/install_PyMeshLab.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'PyMeshLab' failed." >&2
@@ -267,7 +271,7 @@ if [ ${RESULT} -eq 0 ]; then
     fi
     ## Install: tetgen
     echo -e "\n==============\n# Install: tetgen\n=============="
-    bash ${SCRIPT_DIR}/install_python_tetgen.sh -v=$(get_jq_value "packages.version.tetgen") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS}
+    bash ${SCRIPT_DIR}/install_python_tetgen.sh -v=$(get_jq_value "packages.version.tetgen") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS} | tee ${LOG_DIR}/install_tetgen.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'tetgen' failed." >&2
@@ -278,7 +282,7 @@ if [ ${RESULT} -eq 0 ]; then
 
     ## Install: genesis-world
     echo -e "\n==============\n# Install: genesis-world\n=============="
-    bash ${SCRIPT_DIR}/install_python_genesis.sh -v=$(get_jq_value "packages.version.genesis") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS}
+    bash ${SCRIPT_DIR}/install_python_genesis.sh -v=$(get_jq_value "packages.version.genesis") -p=${INSTALL_ROOT} --dist=${DIST_DIR} ${ARGUMENTS} | tee ${LOG_DIR}/install_genesis.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Install 'genesis' failed." >&2
@@ -290,7 +294,7 @@ if [ ${RESULT} -eq 0 ]; then
     ## ========================================
     ## Create script
     echo -e "\n==============\n# Create script\n=============="
-    bash ${SCRIPT_DIR}/create_script.sh --env_name=${ENV_NAME} --pyenv_dir=$(eval echo $(get_jq_value "pyenv.path"))
+    bash ${SCRIPT_DIR}/create_script.sh --env_name=${ENV_NAME} --pyenv_dir=$(eval echo $(get_jq_value "pyenv.path")) | tee ${LOG_DIR}/create_script.log
     RESULT=$?
     if [ ${RESULT} -ne 0 ]; then
       echo "[ERROR] Create script failed." >&2
@@ -303,8 +307,8 @@ if [ ${RESULT} -eq 0 ]; then
 
   ## Display version information
   pushd "${DIST_DIR}" >/dev/null 2>&1
-    bash ${SCRIPT_DIR}/print_ver.sh > ${DIST_DIR}/build_info.log
-    md5sum *.whl *.log > ${DIST_DIR}/md5
+    bash ${SCRIPT_DIR}/print_ver.sh | tee ${DIST_DIR}/build_info.log
+    md5sum *.whl *.log | tee ${DIST_DIR}/md5
   popd >/dev/null 2>&1
 
   if [ "" != ${ENV_NAME} ];then
