@@ -4,6 +4,7 @@
 INSTALL_VER=3.31.5
 INSTALL_ROOT=~/genesis
 INSTALL_TYPE_TAR=0
+JOBS_NUM=$((`nproc` - 1))
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -15,6 +16,13 @@ while [[ $# -gt 0 ]]; do
         exit 0;;
     --tar)
         INSTALL_TYPE_TAR=1
+        shift;;
+    -j=*)
+        JOBS_NUM=${1#*=}
+        shift;;
+    -j)
+        shift
+        JOBS_NUM=$1
         shift;;
     -v=*|--ver=*)
         INSTALL_VER=${1#*=}
@@ -37,6 +45,9 @@ while [[ $# -gt 0 ]]; do
     *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
+if [[ ${JOBS_NUM} -le 0 ]]; then
+  JOBS_NUM=1
+fi
 if [ "" == "${INSTALL_VER}" ];then
     echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
@@ -63,7 +74,7 @@ if [ ${INSTALL_TYPE_TAR} -eq 1 ]; then
             ./bootstrap
             RESULT=$?
             if [ ${RESULT} -eq 0 ]; then
-                make -j $(nproc)
+                make -j ${JOBS_NUM}
                 RESULT=$?
             fi
             if [ ${RESULT} -eq 0 ]; then

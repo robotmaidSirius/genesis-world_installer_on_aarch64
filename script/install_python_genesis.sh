@@ -77,6 +77,7 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
     pushd "${INSTALL_DIR}" >/dev/null 2>&1
         export LD_LIBRARY_PATH=${INSTALL_DIR}/libs:${LD_LIBRARY_PATH}
         rm -rf ./dist
+        sed -i "s/\"taichi == .*\"/\"taichi\"/g" pyproject.toml
         # TODO: The comment can be removed from version 0.2.2 onwards. Tag v0.2.1 does not have setup.py
         #git checkout ${INSTALL_VER}
         if [ -e "requirements.txt" ]; then

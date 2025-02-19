@@ -87,15 +87,15 @@ echo "* screeninfo Usage    : $(pip show screeninfo | grep Version)"
 echo "* six Usage           : $(pip show six | grep Version)"
 
 echo ========================================
-PRINT_TEXT=$(python -c "import torch;print(torch.__version__);")
+PRINT_TEXT=$(pip show torch | grep Version)
 RESULT=$?
 if [[ ${RESULT} -eq 0 ]];then
     echo "* pytorch Usage       : ${PRINT_TEXT}"
     echo "    CUDA version      : $(python -c "import torch;print(torch.version.cuda);")"
     echo "    cuDNN version     : $(python -c "import torch;print(torch.backends.cudnn.version());")"
     echo "    CUDA available    : $(python -c "import torch;print(torch.cuda.is_available());")"
-    echo "    torchvision Usage : $(python -c "import torchvision;print(torchvision.__version__);")"
-    echo "    torchaudio Usage  : $(python -c "import torchaudio;print(torchaudio.__version__);")"
+    echo "    torchvision Usage : $(pip show torchvision | grep Version)"
+    echo "    torchaudio Usage  : $(pip show torchaudio | grep Version)"
 else
     echo "* pytorch Usage       : NOT installed"
     echo "[ERROR] pytorch is not installed." >&2

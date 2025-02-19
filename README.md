@@ -84,7 +84,6 @@ bash install_genesis_on_aarch64.sh -j 2
 
 * [ ] "genesis-world v0.2.1(tag)"はsetup.pyがないため、mainブランチで実施。v0.2.2以以降からスクリプトのコメントアウトを外せるはず
 * [ ] cmakeのインストールは aptで実施している。tarのオプションを検証する
-* [ ] LLVM-15のインストールにすごく時間がかかる。apt管理のLLVMで対応できるか検証する
 * [ ] pytorchなどのSoC毎のスクリプトの動作確認をする
 
 ### Authors and acknowledgment

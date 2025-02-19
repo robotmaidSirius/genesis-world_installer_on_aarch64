@@ -30,3 +30,5 @@ ninja-build
 gcc
 g++
 libatomic1
+#ocaml
+libelf-dev

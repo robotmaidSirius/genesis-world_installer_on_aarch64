@@ -3,14 +3,22 @@
 INSTALL_VER=4.8.0
 INSTALL_ROOT=~/genesis
 INSTALL_WITH_APT=0
+JOBS_NUM=$((`nproc` - 1))
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
-        echo "Usage: $0 -v|--ver [version] -p|--root [path]"
+        echo "Usage: $0 [-v|--ver VERSION] [-p|--root INSTALL_ROOT] [--with_apt] [-j|--jobs JOBS_NUM]"
         exit 0;;
     --with_apt)
         INSTALL_WITH_APT=1
+        shift;;
+    -j=*)
+        JOBS_NUM=${1#*=}
+        shift;;
+    -j)
+        shift
+        JOBS_NUM=$1
         shift;;
     -v=*|--ver=*)
         INSTALL_VER=${1#*=}
@@ -33,6 +41,9 @@ while [[ $# -gt 0 ]]; do
     *) echo "[WARNING] Unknown parameter passed: $1" >&2; shift;;
   esac
 done
+if [[ ${JOBS_NUM} -le 0 ]]; then
+  JOBS_NUM=1
+fi
 if [ "" == "${INSTALL_VER}" ];then
     echo "[WARNING] Since no version was specified, the installation was skipped." >&2
     exit 0
@@ -148,7 +159,7 @@ pushd "${INSTALL_ROOT}" >/dev/null 2>&1
                 ../opencv-${INSTALL_VER}
             RESULT=$?
             if [ ${RESULT} -eq 0 ]; then
-                make -j $(nproc)
+                make -j ${JOBS_NUM}
                 RESULT=$?
             fi
             if [ ${RESULT} -eq 0 ]; then
